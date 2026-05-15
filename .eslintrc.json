@@ -1,0 +1,73 @@
+{
+  "root": true,
+  "extends": "react-native",
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "requireConfigFile": false,
+    "babelOptions": {
+      "presets": [
+        "babel-preset-expo"
+      ]
+    },
+    "ecmaVersion": 2021,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    },
+    "import/resolver": {
+      "node": {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".json"
+        ],
+        "moduleDirectory": [
+          "node_modules",
+          "src"
+        ]
+      }
+    }
+  },
+  "globals": {
+    "__DEV__": "readonly"
+  },
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true,
+    "jest": true
+  },
+  "rules": {
+    "import/no-unresolved": "off",
+    "import/named": "off",
+    "import/namespace": "off",
+    "import/no-namespace": "off",
+    "react/prop-types": "off",
+    "import/prefer-default-export": "off",
+    "no-use-before-define": ["error", { "functions": false, "classes": true, "variables": false }],
+    "arrow-body-style": "off",
+    "class-methods-use-this": "off",
+    "react/jsx-no-bind": "off",
+    "react/jsx-pascal-case": "off",
+    "no-console": "warn",
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "prefer-const": "warn",
+    "no-var": "error",
+    "eqeqeq": "warn",
+    "react-native/no-unused-styles": "warn",
+    "react-native/no-inline-styles": "warn"
+  },
+  "overrides": [
+    {
+      "files": ["babel.config.js"],
+      "rules": {
+        "import/no-commonjs": "off"
+      }
+    }
+  ]
+}

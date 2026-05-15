@@ -1,0 +1,30 @@
+Runme for NeuronSparks
+
+1. Install dependencies
+   npm install
+
+1.5. Make sure Node.js is v20.19.4 or newer
+   node --version
+   If your version is older, install the latest LTS from https://nodejs.org/en/download
+
+2. Start the Expo app
+   npm run start
+
+3. Run on a device/emulator
+   - In the Expo browser UI, choose "Run on Android device/emulator" or "Run on iOS simulator"
+   - Or scan the QR code with Expo Go on a physical device
+
+4. Run on web
+   npm run web
+
+5. Clear cache when startup fails
+   expo start --clear
+
+6. Use Node 20+ if you have multiple versions installed
+   node --version
+
+Notes:
+- Expo SDK 55 requires Node.js v20.19.4 or newer.
+- Ensure `package.json` scripts reference Expo CLI correctly.
+- If `node_modules` or `package-lock.json` is broken, delete them and reinstall.
+- For lint checks, run `npm run lint`.

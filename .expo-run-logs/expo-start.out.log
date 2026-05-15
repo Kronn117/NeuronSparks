@@ -1,0 +1,7 @@
+env: load .env
+env: export EXPO_PUBLIC_API_TIMEOUT EXPO_PUBLIC_API_URL EXPO_PUBLIC_DEBUG EXPO_PUBLIC_ENABLE_AI_FEATURES EXPO_PUBLIC_ENABLE_CLOUD_SYNC EXPO_PUBLIC_ENABLE_VOICE_NOTES EXPO_PUBLIC_ENV
+Starting project at C:\Users\wwwze\Desktop\Mobile App Dev\NeuronSparks
+Starting Metro Bundler
+
+Waiting on http://localhost:8081
+Logs for your project will appear below.
