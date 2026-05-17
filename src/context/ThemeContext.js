@@ -1,12 +1,12 @@
 /**
  * Theme Context
- * Manages app theme (dark/light mode)
- * Currently supports dark theme - light theme placeholder for future
+ * Manages app theme (dark/light mode) with enhanced color palettes
  */
 
-import React, { createContext, useReducer, useCallback, useEffect } from 'react';
+import React, { createContext, useReducer, useCallback, useEffect, useContext } from 'react';
 import { logger } from '@utils/logger';
 import { StorageService } from '@services/StorageService';
+import { getThemeColors, getThemeShadows } from '@utils/theme';
 
 // Create context
 export const ThemeContext = createContext();
@@ -15,8 +15,10 @@ export const ThemeContext = createContext();
  * Initial state
  */
 const initialState = {
-    isDarkMode: true, // Neuron Sparks uses dark theme
+    isDarkMode: true, // Default to dark mode
     loading: true,
+    colors: null, // Will be set based on mode
+    shadows: null, // Will be set based on mode
 };
 
 /**
@@ -25,6 +27,8 @@ const initialState = {
 const ACTIONS = {
     SET_THEME_MODE: 'SET_THEME_MODE',
     SET_LOADING: 'SET_LOADING',
+    SET_COLORS: 'SET_COLORS',
+    SET_SHADOWS: 'SET_SHADOWS',
 };
 
 /**
@@ -38,6 +42,12 @@ const themeReducer = (state, action) => {
         case ACTIONS.SET_LOADING:
             return {...state, loading: action.payload };
 
+        case ACTIONS.SET_COLORS:
+            return {...state, colors: action.payload };
+
+        case ACTIONS.SET_SHADOWS:
+            return {...state, shadows: action.payload };
+
         default:
             return state;
     }
@@ -48,6 +58,19 @@ const themeReducer = (state, action) => {
  */
 export const ThemeContextProvider = ({ children }) => {
     const [state, dispatch] = useReducer(themeReducer, initialState);
+
+    /**
+     * Update theme colors and shadows when mode changes
+     */
+    useEffect(() => {
+        const colors = getThemeColors(state.isDarkMode);
+        const shadows = getThemeShadows(state.isDarkMode);
+        
+        dispatch({ type: ACTIONS.SET_COLORS, payload: colors });
+        dispatch({ type: ACTIONS.SET_SHADOWS, payload: shadows });
+        
+        logger.log(`🎨 Theme colors updated: ${state.isDarkMode ? 'Dark' : 'Light'}`);
+    }, [state.isDarkMode]);
 
     /**
      * Load theme preference from storage
@@ -115,9 +138,23 @@ export const ThemeContextProvider = ({ children }) => {
     const value = {
         isDarkMode: state.isDarkMode,
         loading: state.loading,
+        colors: state.colors,
+        shadows: state.shadows,
         toggleTheme,
         setTheme,
     };
 
     return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+};
+
+/**
+ * Custom hook to use theme context
+ * @returns {Object} Theme context value
+ */
+export const useTheme = () => {
+    const context = useContext(ThemeContext);
+    if (!context) {
+        throw new Error('useTheme must be used within ThemeContextProvider');
+    }
+    return context;
 };

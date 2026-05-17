@@ -13,26 +13,30 @@ export const SCREEN_NAMES = {
     ARCHIVE: 'Archive',
 };
 
-// Default Tags for Notes
+// Default Tags for Notes - Updated with modern color palette
 export const DEFAULT_TAGS = [
-    { id: 'urgent', label: 'urgent', color: '#FF006E' },
-    { id: 'work', label: 'work', color: '#1E90FF' },
-    { id: 'personal', label: 'personal', color: '#00CC33' },
-    { id: 'project', label: 'project', color: '#9933FF' },
-    { id: 'meeting', label: 'meeting', color: '#FFE600' },
-    { id: 'shopping', label: 'shopping', color: '#FF8C00' },
-    { id: 'ideas', label: 'ideas', color: '#00D9FF' },
-    { id: 'reading', label: 'reading', color: '#1E90FF' },
+    { id: 'urgent', label: 'urgent', color: '#EF4444' },
+    { id: 'work', label: 'work', color: '#0EA5E9' },
+    { id: 'personal', label: 'personal', color: '#10B981' },
+    { id: 'project', label: 'project', color: '#8B5CF6' },
+    { id: 'meeting', label: 'meeting', color: '#F59E0B' },
+    { id: 'shopping', label: 'shopping', color: '#F97316' },
+    { id: 'ideas', label: 'ideas', color: '#06B6D4' },
+    { id: 'reading', label: 'reading', color: '#6366F1' },
 ];
 
-// Note Colors Available for Selection
+// Note Colors Available for Selection - Updated with modern palette
 export const NOTE_COLORS = [
-    { name: 'Blue', value: '#1E90FF' },
-    { name: 'Purple', value: '#9933FF' },
-    { name: 'Pink', value: '#FF1493' },
-    { name: 'Green', value: '#00CC33' },
-    { name: 'Orange', value: '#FF8C00' },
-    { name: 'Cyan', value: '#00D9FF' },
+    { name: 'Blue', value: '#0EA5E9' },
+    { name: 'Purple', value: '#8B5CF6' },
+    { name: 'Pink', value: '#EC4899' },
+    { name: 'Green', value: '#10B981' },
+    { name: 'Orange', value: '#F97316' },
+    { name: 'Cyan', value: '#06B6D4' },
+    { name: 'Gold', value: '#F59E0B' },
+    { name: 'Red', value: '#EF4444' },
+    { name: 'Indigo', value: '#6366F1' },
+    { name: 'Teal', value: '#14B8A6' },
 ];
 
 // Default Note Color (first from array)
