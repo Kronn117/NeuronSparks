@@ -73,3 +73,43 @@
 
 - The repaired files now pass targeted ESLint validation.
 - A full project lint run still shows unrelated existing issues in other files, but the main startup-critical screen components are fixed.
+
+## Theme Development Session Fixes
+
+### Errors encountered
+
+- **"startFloating is not a function"** - Hook destructuring error in HomeScreen.js
+- **"(0 , _ThemeContext.useTheme) is not a function"** - Missing useTheme custom hook export
+- **Java version incompatibility** - JDK 25 too new for React Native Gradle plugin
+- **Color literal lint error** - Hardcoded color `#00D4FF` in CreateScreen.js
+- **Duplicate style key 'content'** - Conflicting style property in DetailScreen.js
+- **Unnecessary else after return** - ESLint error in theme.js getThemeShadows function
+- **Port 8081 conflict** - Port already in use by another process
+
+### Fixes applied
+
+- Fixed useFloating hook destructuring in HomeScreen.js by correctly extracting startFloating
+- Added useTheme custom hook export to ThemeContext.js with useContext and error handling
+- Uninstalled JDK 25 and installed JDK 17 for React Native compatibility
+- Replaced hardcoded color `#00D4FF` with `THEME.colors.primary` in CreateScreen.js
+- Renamed duplicate style key from 'content' to 'contentText' in DetailScreen.js
+- Removed unnecessary else statement after return in theme.js getThemeShadows function
+- Switched Expo dev server to port 8082 to avoid conflict
+
+### Methods used
+
+- Used `read_file` to inspect affected components and identify error sources
+- Applied targeted string replacements with `edit` tool for precise fixes
+- Ran `npm run lint` to validate fixes and identify remaining issues
+- Checked Java version with `java -version` to diagnose compatibility issues
+- Used `npx expo prebuild` to generate native code for APK building
+- Built APK with Gradle: `./gradlew clean && ./gradlew assembleRelease`
+- Renamed APK file with `mv` command for versioned naming
+
+## Theme Development Commands
+
+- `npx expo start --port 8082` - Start dev server on specific port
+- `npx expo prebuild` - Generate native Android/iOS code
+- `cd android && ./gradlew clean` - Clean Gradle build
+- `cd android && ./gradlew assembleRelease` - Build release APK
+- `java -version` - Check Java version (requires JDK 17 for React Native)
