@@ -1,45 +1,78 @@
 /**
  * Create Screen
- * Screen for creating new notes with Tony Stark-style UI
  */
 
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, {
+    useState,
+    useCallback,
+    useEffect
+} from 'react';
 import {
-    SafeAreaView,
     View,
     StyleSheet,
     TextInput,
     TouchableOpacity,
     Text,
-    ScrollView,
     Alert,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-import { THEME } from '@utils/theme';
-import { useNotes } from '@hooks/useNotes';
-import { useResponsive, useResponsiveFontSize } from '@hooks/useResponsive';
-import { useFadeIn } from '@hooks/useAnimations';
-import { useTheme } from '@context/ThemeContext';
-import { DEFAULT_TAGS, NOTE_COLORS, DEFAULT_NOTE_COLOR } from '@utils/constants';
-import { logger } from '@utils/logger';
+import {
+    MaterialCommunityIcons
+} from '@expo/vector-icons';
+import {
+    useNavigation,
+    useRoute
+} from '@react-navigation/native';
+import Animated, {
+    FadeInDown
+} from 'react-native-reanimated';
+import {
+    THEME
+} from '@utils/theme';
+import {
+    useNotes
+} from '@hooks/useNotes';
+import {
+    useResponsiveFontSize
+} from '@hooks/useResponsive';
+import {
+    useFadeIn
+} from '@hooks/useAnimations';
+import {
+    useTheme
+} from '@context/ThemeContext';
+import {
+    DEFAULT_TAGS,
+    NOTE_COLORS,
+    DEFAULT_NOTE_COLOR
+} from '@utils/constants';
+import ScreenContainer from '@components/ScreenContainer';
+import {
+    logger
+} from '@utils/logger';
+
+const EMPTY_INITIAL = {
+    title: '',
+    content: '',
+    tags: []
+};
 
 const CreateScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
-    const { addNote } = useNotes();
-    const initialData = route.params?.initialData || { title: '', content: '', tags: [] };
+    const {
+        addNote
+    } = useNotes();
+    const routeParams = route.params || {};
+    const initialData = routeParams.initialData || EMPTY_INITIAL;
 
-    // Responsive design
-    const { isMobile, isTablet } = useResponsive();
     const responsiveFontSize = useResponsiveFontSize(THEME.fontSizes.xl);
-
-    // Theme context for dynamic colors
-    const { colors, shadows, isDarkMode } = useTheme();
-
-    // Animations
-    const { animatedStyle: fadeInStyle, startAnimation: startFadeIn } = useFadeIn();
+    const {
+        colors
+    } = useTheme();
+    const {
+        animatedStyle: fadeInStyle,
+        startAnimation: startFadeIn
+    } = useFadeIn();
 
     const [title, setTitle] = useState(initialData.title || '');
     const [content, setContent] = useState(initialData.content || '');
@@ -75,8 +108,6 @@ const CreateScreen = () => {
 
         try {
             setLoading(true);
-            logger.log(' Saving new note...');
-
             await addNote({
                 title: title.trim(),
                 content: content.trim(),
@@ -85,11 +116,9 @@ const CreateScreen = () => {
                 isPinned: false,
                 isArchived: false,
             });
-
-            logger.log(' Note saved successfully');
             navigation.goBack();
         } catch (error) {
-            logger.error(' Failed to save note:', error);
+            logger.error('Failed to save note:', error);
             Alert.alert('Error', 'Failed to save note. Please try again.');
         } finally {
             setLoading(false);
@@ -97,12 +126,18 @@ const CreateScreen = () => {
     }, [title, content, selectedTags, selectedColor, addNote, navigation]);
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.bg_dark }]}>
-            <Animated.View style={[styles.header, fadeInStyle, { backgroundColor: colors.bg_dark, borderBottomColor: colors.border_medium }]}>
+        <ScreenContainer>
+            <Animated.View style={[styles.header, fadeInStyle, {
+                backgroundColor: colors.bg_dark,
+                borderBottomColor: colors.border_medium
+            }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <MaterialCommunityIcons name="arrow-left" size={24} color={colors.text_primary} />
                 </TouchableOpacity>
-                <Text style={[styles.headerTitle, { fontSize: responsiveFontSize, color: colors.text_primary }]}>New Note</Text>
+                <Text style={[styles.headerTitle, {
+                    fontSize: responsiveFontSize,
+                    color: colors.text_primary
+                }]}>New Note</Text>
                 <TouchableOpacity onPress={handleSave} style={styles.saveButton} disabled={loading}>
                     <MaterialCommunityIcons
                         name="check"
@@ -112,7 +147,10 @@ const CreateScreen = () => {
                 </TouchableOpacity>
             </Animated.View>
 
-            <Animated.ScrollView style={[styles.content, { backgroundColor: colors.bg_dark }]} keyboardShouldPersistTaps="handled">
+            <Animated.ScrollView
+                style={[styles.content, { backgroundColor: colors.bg_dark }]}
+                keyboardShouldPersistTaps="handled"
+            >
                 <Animated.View entering={FadeInDown.delay(100).springify()}>
                     <TextInput
                         style={[styles.titleInput, { color: colors.text_primary }]}
@@ -150,9 +188,9 @@ const CreateScreen = () => {
                                     ]}
                                     onPress={() => setSelectedColor(color.value)}
                                 >
-                                    {selectedColor === color.value && (
+                                    {selectedColor === color.value ? (
                                         <MaterialCommunityIcons name="check" size={20} color={colors.text_inverse} />
-                                    )}
+                                    ) : null}
                                 </TouchableOpacity>
                             ))}
                         </View>
@@ -173,12 +211,9 @@ const CreateScreen = () => {
                                     ]}
                                     onPress={() => toggleTag(tag.id)}
                                 >
-                                    <Text
-                                        style={[
-                                            styles.tagText,
-                                            { color: selectedTags.includes(tag.label) ? colors.text_inverse : tag.color },
-                                        ]}
-                                    >
+                                    <Text style={[styles.tagText, {
+                                        color: selectedTags.includes(tag.label) ? colors.text_inverse : tag.color
+                                    }]}>
                                         #{tag.label}
                                     </Text>
                                 </TouchableOpacity>
@@ -187,14 +222,11 @@ const CreateScreen = () => {
                     </View>
                 </Animated.View>
             </Animated.ScrollView>
-        </SafeAreaView>
+        </ScreenContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -205,18 +237,18 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
     },
     backButton: {
-        padding: THEME.spacing.sm,
+        padding: THEME.spacing.sm
     },
     headerTitle: {
         fontSize: THEME.fontSizes.lg,
-        fontWeight: THEME.fontWeights.semibold,
+        fontWeight: THEME.fontWeights.semibold
     },
     saveButton: {
-        padding: THEME.spacing.sm,
+        padding: THEME.spacing.sm
     },
     content: {
         flex: 1,
-        padding: THEME.spacing.md,
+        padding: THEME.spacing.md
     },
     titleInput: {
         fontSize: THEME.fontSizes.xl,
@@ -231,7 +263,7 @@ const styles = StyleSheet.create({
         lineHeight: 22,
     },
     section: {
-        marginBottom: THEME.spacing.lg,
+        marginBottom: THEME.spacing.lg
     },
     sectionTitle: {
         fontSize: THEME.fontSizes.sm,
@@ -241,7 +273,7 @@ const styles = StyleSheet.create({
     colorOptions: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: THEME.spacing.sm,
+        gap: THEME.spacing.sm
     },
     colorOption: {
         width: 40,
@@ -252,12 +284,12 @@ const styles = StyleSheet.create({
     },
     selectedColor: {
         borderWidth: 2,
-        borderColor: THEME.colors.primary,
+        borderColor: THEME.colors.primary
     },
     tagsContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: THEME.spacing.sm,
+        gap: THEME.spacing.sm
     },
     tagOption: {
         paddingHorizontal: THEME.spacing.md,
@@ -267,7 +299,7 @@ const styles = StyleSheet.create({
     },
     tagText: {
         fontSize: THEME.fontSizes.sm,
-        fontWeight: THEME.fontWeights.medium,
+        fontWeight: THEME.fontWeights.medium
     },
 });
 

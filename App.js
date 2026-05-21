@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
 import { LogBox } from 'react-native';
@@ -36,7 +36,7 @@ const App = () => {
                 logger.log('🚀 Initializing Neuron Sparks application...');
 
                 await Font.loadAsync({
-                    'JetBrainsMono-Regular': require('@assets/fonts/JetBrainsMono-Regular.ttf'),
+                    'JetBrainsMono-Regular': require('./assets/fonts/JetBrainsMono-Regular.ttf'),
                 });
 
                 logger.log('✅ Fonts loaded successfully');

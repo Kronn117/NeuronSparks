@@ -1,53 +1,85 @@
 /**
  * Detail Screen
- * Screen for viewing and editing notes with Tony Stark-style UI
  */
 
-import React, { useState, useCallback, useEffect } from 'react';
+import React, {
+    useState,
+    useCallback,
+    useEffect
+} from 'react';
 import {
-    SafeAreaView,
     View,
     StyleSheet,
     TextInput,
     TouchableOpacity,
     Text,
-    ScrollView,
     Alert,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-import { THEME } from '@utils/theme';
-import { useNotes } from '@hooks/useNotes';
-import { useResponsive, useResponsiveFontSize } from '@hooks/useResponsive';
-import { useFadeIn } from '@hooks/useAnimations';
-import { useTheme } from '@context/ThemeContext';
-import { DEFAULT_TAGS, NOTE_COLORS } from '@utils/constants';
-import { getTimeAgo } from '@utils/helpers';
-import { logger } from '@utils/logger';
+import {
+    MaterialCommunityIcons
+} from '@expo/vector-icons';
+import {
+    useNavigation,
+    useRoute,
+    useFocusEffect
+} from '@react-navigation/native';
+import Animated, {
+    FadeInDown
+} from 'react-native-reanimated';
+import {
+    THEME
+} from '@utils/theme';
+import {
+    useNotes
+} from '@hooks/useNotes';
+import {
+    useResponsiveFontSize
+} from '@hooks/useResponsive';
+import {
+    useFadeIn
+} from '@hooks/useAnimations';
+import {
+    useTheme
+} from '@context/ThemeContext';
+import {
+    DEFAULT_TAGS,
+    NOTE_COLORS
+} from '@utils/constants';
+import {
+    getTimeAgo
+} from '@utils/helpers';
+import ScreenContainer from '@components/ScreenContainer';
+import {
+    logger
+} from '@utils/logger';
 
 const DetailScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
-    const { note: initialNote } = route.params || {};
-    const { updateNote, deleteNote, togglePin, toggleArchive } = useNotes();
+    const routeParams = route.params || {};
+    const initialNote = routeParams.note;
+    const {
+        updateNote,
+        deleteNote,
+        togglePin
+    } = useNotes();
 
-    // Responsive design
-    const { isMobile, isTablet } = useResponsive();
     const responsiveFontSize = useResponsiveFontSize(THEME.fontSizes.xl);
+    const {
+        colors
+    } = useTheme();
+    const {
+        animatedStyle: fadeInStyle,
+        startAnimation: startFadeIn
+    } = useFadeIn();
 
-    // Theme context for dynamic colors
-    const { colors, shadows, isDarkMode } = useTheme();
-
-    // Animations
-    const { animatedStyle: fadeInStyle, startAnimation: startFadeIn } = useFadeIn();
-
-    const [note, setNote] = useState(initialNote || {});
+    const safeInitial = initialNote || {};
+    const [note, setNote] = useState(safeInitial);
     const [isEditing, setIsEditing] = useState(false);
-    const [title, setTitle] = useState(initialNote?.title || '');
-    const [content, setContent] = useState(initialNote?.content || '');
-    const [selectedTags, setSelectedTags] = useState(initialNote?.tags || []);
-    const [selectedColor, setSelectedColor] = useState(initialNote?.color || NOTE_COLORS[0].value);
+    const [title, setTitle] = useState(safeInitial.title || '');
+    const [content, setContent] = useState(safeInitial.content || '');
+    const [selectedTags, setSelectedTags] = useState(safeInitial.tags || []);
+    const [selectedColor, setSelectedColor] = useState(safeInitial.color || NOTE_COLORS[0].value);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -63,7 +95,7 @@ const DetailScreen = () => {
                 setSelectedTags(initialNote.tags || []);
                 setSelectedColor(initialNote.color || NOTE_COLORS[0].value);
             }
-        }, [initialNote])
+        }, [initialNote]),
     );
 
     const toggleTag = useCallback((tagId) => {
@@ -90,20 +122,16 @@ const DetailScreen = () => {
 
         try {
             setLoading(true);
-            logger.log(' Updating note...');
-
             const updated = await updateNote(note.id, {
                 title: title.trim(),
                 content: content.trim(),
                 tags: selectedTags,
                 color: selectedColor,
             });
-
             setNote(updated);
             setIsEditing(false);
-            logger.log(' Note updated successfully');
         } catch (error) {
-            logger.error(' Failed to update note:', error);
+            logger.error('Failed to update note:', error);
             Alert.alert('Error', 'Failed to update note. Please try again.');
         } finally {
             setLoading(false);
@@ -111,8 +139,10 @@ const DetailScreen = () => {
     }, [title, content, selectedTags, selectedColor, note.id, updateNote]);
 
     const handleDelete = useCallback(() => {
-        Alert.alert('Delete Note', 'Are you sure you want to delete this note?', [
-            { text: 'Cancel', style: 'cancel' },
+        Alert.alert('Delete Note', 'Are you sure you want to delete this note?', [{
+                text: 'Cancel',
+                style: 'cancel'
+            },
             {
                 text: 'Delete',
                 style: 'destructive',
@@ -121,7 +151,7 @@ const DetailScreen = () => {
                         await deleteNote(note.id);
                         navigation.goBack();
                     } catch (error) {
-                        logger.error(' Failed to delete note:', error);
+                        logger.error('Failed to delete note:', error);
                         Alert.alert('Error', 'Failed to delete note');
                     }
                 },
@@ -132,36 +162,34 @@ const DetailScreen = () => {
     const handleTogglePin = useCallback(async () => {
         try {
             await togglePin(note.id);
-            setNote(prev => ({ ...prev, isPinned: !prev.isPinned }));
+            setNote(prev => ({
+                ...prev,
+                isPinned: !prev.isPinned
+            }));
         } catch (error) {
-            logger.error(' Failed to toggle pin:', error);
+            logger.error('Failed to toggle pin:', error);
         }
     }, [note.id, togglePin]);
 
-    const handleToggleArchive = useCallback(async () => {
-        try {
-            await toggleArchive(note.id);
-            setNote(prev => ({ ...prev, isArchived: !prev.isArchived }));
-            navigation.goBack();
-        } catch (error) {
-            logger.error(' Failed to toggle archive:', error);
-        }
-    }, [note.id, toggleArchive, navigation]);
-
     if (!note.id) {
         return (
-            <SafeAreaView style={styles.container}>
+            <ScreenContainer>
                 <View style={styles.errorContainer}>
                     <MaterialCommunityIcons name="alert-circle-outline" size={48} color={THEME.colors.text_tertiary} />
                     <Text style={styles.errorText}>Note not found</Text>
                 </View>
-            </SafeAreaView>
+            </ScreenContainer>
         );
     }
 
+    const noteTags = note.tags || [];
+
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.bg_dark }]}>
-            <Animated.View style={[styles.header, fadeInStyle, { backgroundColor: colors.bg_dark, borderBottomColor: colors.border_medium }]}>
+        <ScreenContainer>
+            <Animated.View style={[styles.header, fadeInStyle, {
+                backgroundColor: colors.bg_dark,
+                borderBottomColor: colors.border_medium
+            }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <MaterialCommunityIcons name="arrow-left" size={24} color={colors.text_primary} />
                 </TouchableOpacity>
@@ -192,7 +220,10 @@ const DetailScreen = () => {
                 </View>
             </Animated.View>
 
-            <Animated.ScrollView style={[styles.content, { backgroundColor: colors.bg_dark }]} keyboardShouldPersistTaps="handled">
+            <Animated.ScrollView
+                style={[styles.content, { backgroundColor: colors.bg_dark }]}
+                keyboardShouldPersistTaps="handled"
+            >
                 {isEditing ? (
                     <>
                         <Animated.View entering={FadeInDown.delay(100).springify()}>
@@ -229,9 +260,9 @@ const DetailScreen = () => {
                                             ]}
                                             onPress={() => setSelectedColor(color.value)}
                                         >
-                                            {selectedColor === color.value && (
+                                            {selectedColor === color.value ? (
                                                 <MaterialCommunityIcons name="check" size={20} color={colors.text_inverse} />
-                                            )}
+                                            ) : null}
                                         </TouchableOpacity>
                                     ))}
                                 </View>
@@ -251,12 +282,9 @@ const DetailScreen = () => {
                                             ]}
                                             onPress={() => toggleTag(tag.id)}
                                         >
-                                            <Text
-                                                style={[
-                                                    styles.tagText,
-                                                    { color: selectedTags.includes(tag.label) ? colors.text_inverse : tag.color },
-                                                ]}
-                                            >
+                                            <Text style={[styles.tagText, {
+                                                color: selectedTags.includes(tag.label) ? colors.text_inverse : tag.color
+                                            }]}>
                                                 #{tag.label}
                                             </Text>
                                         </TouchableOpacity>
@@ -268,36 +296,38 @@ const DetailScreen = () => {
                 ) : (
                     <>
                         <Animated.View entering={FadeInDown.delay(100).springify()}>
-                            <Text style={[styles.title, { fontSize: responsiveFontSize, color: colors.text_primary }]}>{note.title}</Text>
+                            <Text style={[styles.title, {
+                                fontSize: responsiveFontSize,
+                                color: colors.text_primary
+                            }]}>{note.title}</Text>
                         </Animated.View>
                         <Animated.View entering={FadeInDown.delay(200).springify()}>
                             <Text style={[styles.timestamp, { color: colors.text_tertiary }]}>{getTimeAgo(note.updatedAt)}</Text>
                         </Animated.View>
                         <Animated.View entering={FadeInDown.delay(300).springify()}>
-                            {note.content && <Text style={[styles.contentText, { color: colors.text_secondary }]}>{note.content}</Text>}
+                            {note.content ? (
+                                <Text style={[styles.contentText, { color: colors.text_secondary }]}>{note.content}</Text>
+                            ) : null}
                         </Animated.View>
-                        {note.tags?.length > 0 && (
+                        {noteTags.length > 0 ? (
                             <Animated.View entering={FadeInDown.delay(400).springify()}>
                                 <View style={styles.tagsContainer}>
-                                    {note.tags.map(tag => (
+                                    {noteTags.map(tag => (
                                         <Text key={tag} style={[styles.tag, { color: colors.accent_cyan }]}>
                                             #{tag}
                                         </Text>
                                     ))}
                                 </View>
                             </Animated.View>
-                        )}
+                        ) : null}
                     </>
                 )}
             </Animated.ScrollView>
-        </SafeAreaView>
+        </ScreenContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -308,19 +338,19 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
     },
     backButton: {
-        padding: THEME.spacing.sm,
+        padding: THEME.spacing.sm
     },
     headerActions: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'center'
     },
     actionButton: {
         padding: THEME.spacing.sm,
-        marginLeft: THEME.spacing.sm,
+        marginLeft: THEME.spacing.sm
     },
     content: {
         flex: 1,
-        padding: THEME.spacing.md,
+        padding: THEME.spacing.md
     },
     title: {
         fontSize: THEME.fontSizes.xxl,
@@ -329,35 +359,22 @@ const styles = StyleSheet.create({
     },
     timestamp: {
         fontSize: THEME.fontSizes.sm,
-        marginBottom: THEME.spacing.lg,
+        marginBottom: THEME.spacing.lg
     },
     contentText: {
         fontSize: THEME.fontSizes.md,
         lineHeight: 24,
-        marginBottom: THEME.spacing.lg,
+        marginBottom: THEME.spacing.lg
     },
     tagsContainer: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        marginBottom: THEME.spacing.lg,
+        marginBottom: THEME.spacing.lg
     },
     tag: {
         fontSize: THEME.fontSizes.sm,
         marginRight: THEME.spacing.sm,
-        marginBottom: THEME.spacing.sm,
-    },
-    archiveButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        padding: THEME.spacing.md,
-        backgroundColor: THEME.colors.bg_secondary,
-        borderRadius: THEME.borderRadius.md,
-        marginTop: THEME.spacing.lg,
-    },
-    archiveButtonText: {
-        fontSize: THEME.fontSizes.sm,
-        color: THEME.colors.text_secondary,
-        marginLeft: THEME.spacing.sm,
+        marginBottom: THEME.spacing.sm
     },
     titleInput: {
         fontSize: THEME.fontSizes.xl,
@@ -372,7 +389,7 @@ const styles = StyleSheet.create({
         lineHeight: 22,
     },
     section: {
-        marginBottom: THEME.spacing.lg,
+        marginBottom: THEME.spacing.lg
     },
     sectionTitle: {
         fontSize: THEME.fontSizes.sm,
@@ -382,7 +399,7 @@ const styles = StyleSheet.create({
     colorOptions: {
         flexDirection: 'row',
         flexWrap: 'wrap',
-        gap: THEME.spacing.sm,
+        gap: THEME.spacing.sm
     },
     colorOption: {
         width: 40,
@@ -393,7 +410,7 @@ const styles = StyleSheet.create({
     },
     selectedColor: {
         borderWidth: 2,
-        borderColor: THEME.colors.primary,
+        borderColor: THEME.colors.primary
     },
     tagOption: {
         paddingHorizontal: THEME.spacing.md,
@@ -403,16 +420,16 @@ const styles = StyleSheet.create({
     },
     tagText: {
         fontSize: THEME.fontSizes.sm,
-        fontWeight: THEME.fontWeights.medium,
+        fontWeight: THEME.fontWeights.medium
     },
     errorContainer: {
         flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
+        alignItems: 'center'
     },
     errorText: {
         fontSize: THEME.fontSizes.md,
-        marginTop: THEME.spacing.md,
+        marginTop: THEME.spacing.md
     },
 });
 

@@ -1,92 +1,88 @@
 /**
  * Settings Screen
- * Screen for app settings and data management with Tony Stark-style UI
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, {
+    useEffect
+} from 'react';
 import {
-    SafeAreaView,
     View,
     StyleSheet,
     Text,
-    FlatList,
     TouchableOpacity,
     Alert,
+    Share,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
-import { THEME } from '@utils/theme';
-import { useNotes } from '@hooks/useNotes';
-import { useResponsive, useResponsiveFontSize } from '@hooks/useResponsive';
-import { useFadeIn } from '@hooks/useAnimations';
-import { useTheme } from '@context/ThemeContext';
-import { logger } from '@utils/logger';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import {
+    MaterialCommunityIcons
+} from '@expo/vector-icons';
+import {
+    useNavigation
+} from '@react-navigation/native';
+import Animated, {
+    FadeInDown
+} from 'react-native-reanimated';
+import {
+    THEME
+} from '@utils/theme';
+import {
+    useNotes
+} from '@hooks/useNotes';
+import {
+    useResponsiveFontSize
+} from '@hooks/useResponsive';
+import {
+    useFadeIn
+} from '@hooks/useAnimations';
+import {
+    useTheme
+} from '@context/ThemeContext';
+import {
+    ExportService
+} from '@services/ExportService';
+import {
+    SUCCESS_MESSAGES
+} from '@utils/constants';
+import ScreenContainer from '@components/ScreenContainer';
+import {
+    logger
+} from '@utils/logger';
 
 const SettingsScreen = () => {
     const navigation = useNavigation();
-    const { getStatistics, deleteMultiple } = useNotes();
-
-    // Responsive design
-    const { isMobile, isTablet } = useResponsive();
+    const {
+        notes,
+        deleteMultiple
+    } = useNotes();
     const responsiveFontSize = useResponsiveFontSize(THEME.fontSizes.lg);
-
-    // Theme context for dynamic colors
-    const { colors, shadows, isDarkMode, toggleTheme } = useTheme();
-
-    // Animations
-    const { animatedStyle: fadeInStyle, startAnimation: startFadeIn } = useFadeIn();
+    const {
+        colors
+    } = useTheme();
+    const {
+        animatedStyle: fadeInStyle,
+        startAnimation: startFadeIn
+    } = useFadeIn();
 
     useEffect(() => {
         startFadeIn();
     }, [startFadeIn]);
 
-    const handleClearAllNotes = () => {
-        Alert.alert(
-            'Clear All Notes',
-            'Are you sure you want to delete all notes? This action cannot be undone.',
-            [
-                { text: 'Cancel', style: 'cancel' },
-                {
-                    text: 'Delete All',
-                    style: 'destructive',
-                    onPress: async () => {
-                        try {
-                            const stats = getStatistics();
-                            const allNoteIds = stats.allNotes?.map(n => n.id) || [];
-                            if (allNoteIds.length > 0) {
-                                await deleteMultiple(allNoteIds);
-                                Alert.alert('Success', 'All notes have been deleted');
-                            } else {
-                                Alert.alert('Info', 'No notes to delete');
-                            }
-                        } catch (error) {
-                            logger.error('❌ Failed to clear notes:', error);
-                            Alert.alert('Error', 'Failed to clear notes');
-                        }
-                    },
-                },
-            ]
-        );
-    };
-
-    const handleExportNotes = () => {
-        Alert.alert('Export Notes', 'Export functionality coming soon');
-    };
-
     const handleClearAllNotesPress = () => {
         Alert.alert(
             'Clear All Notes',
             'Are you sure you want to delete all notes? This action cannot be undone.',
-            [
-                { text: 'Cancel', style: 'cancel' },
+            [{
+                    text: 'Cancel',
+                    style: 'cancel'
+                },
                 {
                     text: 'Delete All',
                     style: 'destructive',
                     onPress: async () => {
                         try {
-                            const stats = getStatistics();
-                            const allNoteIds = stats.allNotes?.map(n => n.id) || [];
+                            const allNoteIds = notes.map(n => n.id);
                             if (allNoteIds.length > 0) {
                                 await deleteMultiple(allNoteIds);
                                 Alert.alert('Success', 'All notes have been deleted');
@@ -94,29 +90,61 @@ const SettingsScreen = () => {
                                 Alert.alert('Info', 'No notes to delete');
                             }
                         } catch (error) {
-                            logger.error('❌ Failed to clear notes:', error);
+                            logger.error('Failed to clear notes:', error);
                             Alert.alert('Error', 'Failed to clear notes');
                         }
                     },
                 },
-            ]
+            ],
         );
     };
 
-    const handleExportNotesPress = () => {
-        Alert.alert('Export Notes', 'Export functionality coming soon');
+    const handleExportNotesPress = async () => {
+        if (notes.length === 0) {
+            Alert.alert('Info', 'No notes to export');
+            return;
+        }
+
+        try {
+            const json = await ExportService.exportToJSON(notes);
+            const filename = ExportService.getExportFilename('json');
+            const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+
+            await FileSystem.writeAsStringAsync(fileUri, json, {
+                encoding: FileSystem.EncodingType.UTF8,
+            });
+
+            const canShare = await Sharing.isAvailableAsync();
+            if (canShare) {
+                await Sharing.shareAsync(fileUri, {
+                    mimeType: 'application/json',
+                    dialogTitle: 'Export Notes',
+                });
+            } else {
+                await Share.share({
+                    message: json,
+                    title: 'Neuron Sparks Notes Export',
+                });
+            }
+
+            Alert.alert('Success', SUCCESS_MESSAGES.NOTES_EXPORTED);
+        } catch (error) {
+            logger.error('Failed to export notes:', error);
+            Alert.alert('Error', 'Failed to export notes');
+        }
     };
 
     const handleAboutPress = () => {
         Alert.alert(
             'About Neuron Sparks',
             'Version 1.0.0\n\nA production-grade sci-fi themed notes application built with React Native and Expo.',
-            [{ text: 'OK' }]
+            [{
+                text: 'OK'
+            }],
         );
     };
 
-    const settingsItems = [
-        {
+    const settingsItems = [{
             icon: 'delete-sweep',
             title: 'Clear All Notes',
             description: 'Delete all notes permanently',
@@ -140,15 +168,18 @@ const SettingsScreen = () => {
     ];
 
     return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.bg_dark }]}>
-            <Animated.View style={[styles.header, fadeInStyle, { backgroundColor: colors.bg_dark, borderBottomColor: colors.border_medium }]}>
+        <ScreenContainer>
+            <Animated.View style={[styles.header, fadeInStyle, {
+                backgroundColor: colors.bg_dark,
+                borderBottomColor: colors.border_medium
+            }]}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
                     <MaterialCommunityIcons name="arrow-left" size={24} color={colors.text_primary} />
                 </TouchableOpacity>
-                <Text style={[styles.headerTitle, { fontSize: responsiveFontSize, color: colors.text_primary }]}>Settings</Text>
-                <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
-                    <MaterialCommunityIcons name={isDarkMode ? 'white-balance-sunny' : 'moon-waning-crescent'} size={24} color={colors.text_primary} />
-                </TouchableOpacity>
+                <Text style={[styles.headerTitle, {
+                    fontSize: responsiveFontSize,
+                    color: colors.text_primary
+                }]}>Settings</Text>
             </Animated.View>
 
             <Animated.ScrollView style={[styles.content, { backgroundColor: colors.bg_dark }]}>
@@ -156,11 +187,7 @@ const SettingsScreen = () => {
                     <View style={[styles.section, { backgroundColor: colors.bg_card }]}>
                         <Text style={[styles.sectionTitle, { color: colors.text_secondary }]}>Data Management</Text>
                         {settingsItems.slice(0, 2).map((item, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                style={styles.settingItem}
-                                onPress={item.handlePress}
-                            >
+                            <TouchableOpacity key={index} style={styles.settingItem} onPress={item.handlePress}>
                                 <View style={styles.settingItemLeft}>
                                     <MaterialCommunityIcons
                                         name={item.icon}
@@ -173,11 +200,7 @@ const SettingsScreen = () => {
                                         <Text style={[styles.settingDescription, { color: colors.text_tertiary }]}>{item.description}</Text>
                                     </View>
                                 </View>
-                                <MaterialCommunityIcons
-                                    name="chevron-right"
-                                    size={24}
-                                    color={colors.text_tertiary}
-                                />
+                                <MaterialCommunityIcons name="chevron-right" size={24} color={colors.text_tertiary} />
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -185,41 +208,9 @@ const SettingsScreen = () => {
 
                 <Animated.View entering={FadeInDown.delay(200).springify()}>
                     <View style={[styles.section, { backgroundColor: colors.bg_card }]}>
-                        <Text style={[styles.sectionTitle, { color: colors.text_secondary }]}>Appearance</Text>
-                        <TouchableOpacity
-                            style={styles.settingItem}
-                            onPress={toggleTheme}
-                        >
-                            <View style={styles.settingItemLeft}>
-                                <MaterialCommunityIcons
-                                    name={isDarkMode ? 'weather-night' : 'weather-sunny'}
-                                    size={24}
-                                    color={colors.primary}
-                                    style={styles.settingIcon}
-                                />
-                                <View style={styles.settingItemText}>
-                                    <Text style={[styles.settingTitle, { color: colors.text_primary }]}>Dark Mode</Text>
-                                    <Text style={[styles.settingDescription, { color: colors.text_tertiary }]}>{isDarkMode ? 'Currently enabled' : 'Currently disabled'}</Text>
-                                </View>
-                            </View>
-                            <MaterialCommunityIcons
-                                name={isDarkMode ? 'toggle-switch' : 'toggle-switch-off'}
-                                size={24}
-                                color={colors.primary}
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </Animated.View>
-
-                <Animated.View entering={FadeInDown.delay(300).springify()}>
-                    <View style={[styles.section, { backgroundColor: colors.bg_card }]}>
                         <Text style={[styles.sectionTitle, { color: colors.text_secondary }]}>About</Text>
                         {settingsItems.slice(2).map((item, index) => (
-                            <TouchableOpacity
-                                key={index}
-                                style={styles.settingItem}
-                                onPress={item.handlePress}
-                            >
+                            <TouchableOpacity key={index} style={styles.settingItem} onPress={item.handlePress}>
                                 <View style={styles.settingItemLeft}>
                                     <MaterialCommunityIcons
                                         name={item.icon}
@@ -232,11 +223,7 @@ const SettingsScreen = () => {
                                         <Text style={[styles.settingDescription, { color: colors.text_tertiary }]}>{item.description}</Text>
                                     </View>
                                 </View>
-                                <MaterialCommunityIcons
-                                    name="chevron-right"
-                                    size={24}
-                                    color={colors.text_tertiary}
-                                />
+                                <MaterialCommunityIcons name="chevron-right" size={24} color={colors.text_tertiary} />
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -244,23 +231,16 @@ const SettingsScreen = () => {
 
                 <Animated.View entering={FadeInDown.delay(300).springify()}>
                     <View style={styles.infoSection}>
-                        <Text style={styles.infoText}>
-                            Neuron Sparks v1.0.0
-                        </Text>
-                        <Text style={styles.infoText}>
-                            Built with React Native & Expo
-                        </Text>
+                        <Text style={[styles.infoText, { color: colors.text_tertiary }]}>Neuron Sparks v1.0.0</Text>
+                        <Text style={[styles.infoText, { color: colors.text_tertiary }]}>Built with React Native and Expo</Text>
                     </View>
                 </Animated.View>
             </Animated.ScrollView>
-        </SafeAreaView>
+        </ScreenContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
     header: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -271,18 +251,15 @@ const styles = StyleSheet.create({
     },
     backButton: {
         padding: THEME.spacing.sm,
-        marginRight: THEME.spacing.sm,
+        marginRight: THEME.spacing.sm
     },
     headerTitle: {
         fontSize: THEME.fontSizes.lg,
         fontWeight: THEME.fontWeights.semibold,
-        flex: 1,
-    },
-    themeToggle: {
-        padding: THEME.spacing.sm,
+        flex: 1
     },
     content: {
-        flex: 1,
+        flex: 1
     },
     section: {
         marginTop: THEME.spacing.lg,
@@ -307,13 +284,13 @@ const styles = StyleSheet.create({
     settingItemLeft: {
         flexDirection: 'row',
         alignItems: 'center',
-        flex: 1,
+        flex: 1
     },
     settingIcon: {
-        marginRight: THEME.spacing.md,
+        marginRight: THEME.spacing.md
     },
     settingItemText: {
-        flex: 1,
+        flex: 1
     },
     settingTitle: {
         fontSize: THEME.fontSizes.md,
@@ -321,7 +298,7 @@ const styles = StyleSheet.create({
         marginBottom: THEME.spacing.xs,
     },
     settingDescription: {
-        fontSize: THEME.fontSizes.sm,
+        fontSize: THEME.fontSizes.sm
     },
     infoSection: {
         marginTop: THEME.spacing.xl,
@@ -331,7 +308,7 @@ const styles = StyleSheet.create({
     },
     infoText: {
         fontSize: THEME.fontSizes.sm,
-        marginBottom: THEME.spacing.xs,
+        marginBottom: THEME.spacing.xs
     },
 });
 

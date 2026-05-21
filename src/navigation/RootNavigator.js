@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Root Navigator
  * Main navigation structure for the app
  */
@@ -12,7 +12,6 @@ import { THEME } from '@utils/theme';
 import { SCREEN_NAMES } from '@utils/constants';
 import { logger } from '@utils/logger';
 
-// Screens
 import HomeScreen from '@screens/HomeScreen';
 import CreateScreen from '@screens/CreateScreen';
 import DetailScreen from '@screens/DetailScreen';
@@ -34,7 +33,9 @@ const screenOptions = {
         color: THEME.colors.text_primary,
     },
     headerBackTitleVisible: false,
-    cardStyle: { backgroundColor: THEME.colors.bg_dark },
+    cardStyle: {
+        backgroundColor: THEME.colors.bg_dark,
+    },
 };
 
 const RootNavigator = () => {
@@ -43,10 +44,10 @@ const RootNavigator = () => {
             <StatusBar style="light" backgroundColor={THEME.colors.bg_dark} />
             <NavigationContainer
                 onReady={() => {
-                logger.log('✅ Navigation ready');
+                    logger.log('Navigation ready');
                 }}
                 onStateChange={() => {
-                logger.log('📍 Navigation state changed');
+                    logger.log('Navigation state changed');
                 }}
             >
                 <Stack.Navigator
@@ -66,15 +67,16 @@ const RootNavigator = () => {
                         component={CreateScreen}
                         options={{
                             title: 'New Note',
+                            headerShown: false,
                             animationEnabled: true,
                         }}
                     />
                     <Stack.Screen
                         name={SCREEN_NAMES.DETAIL}
                         component={DetailScreen}
-                        options={({ route }) => ({
-                            title: route?.params?.note?.title || 'Note Details',
-                        })}
+                        options={{
+                            headerShown: false,
+                        }}
                     />
                     <Stack.Screen
                         name={SCREEN_NAMES.SEARCH}
@@ -87,12 +89,18 @@ const RootNavigator = () => {
                     <Stack.Screen
                         name={SCREEN_NAMES.SETTINGS}
                         component={SettingsScreen}
-                        options={{ title: 'Settings' }}
+                        options={{
+                            title: 'Settings',
+                            headerShown: false,
+                        }}
                     />
                     <Stack.Screen
                         name={SCREEN_NAMES.ARCHIVE}
                         component={ArchiveScreen}
-                        options={{ title: 'Archived Notes' }}
+                        options={{
+                            title: 'Archived Notes',
+                            headerShown: false,
+                        }}
                     />
                 </Stack.Navigator>
             </NavigationContainer>

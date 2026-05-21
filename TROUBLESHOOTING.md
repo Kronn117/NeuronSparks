@@ -113,3 +113,58 @@
 - `cd android && ./gradlew clean` - Clean Gradle build
 - `cd android && ./gradlew assembleRelease` - Build release APK
 - `java -version` - Check Java version (requires JDK 17 for React Native)
+
+## Settings, Mobile Layout, and Theme Fixes
+
+### Errors encountered
+
+- **Clear All Notes always shows "No notes to delete"** — `SettingsScreen` read `stats.allNotes` from `getStatistics()`, but that function only returns counts, not note objects or IDs.
+- **Export Notes does nothing** — Handler was a placeholder alert ("Export functionality coming soon"); `ExportService` existed but was never wired from the UI.
+- **Duplicate "Settings" headers** — Stack navigator showed a native header while `SettingsScreen` also rendered a custom header with the same title (same issue on Create, Archive, and Detail).
+- **Content clips under status bar on phones** — Screens used React Native's `SafeAreaView` instead of `react-native-safe-area-context`, despite `SafeAreaProvider` being configured in `App.js`.
+- **FAB overlaps home indicator** — Fixed bottom positioning with no safe-area inset.
+- **Light mode not appealing / theme confusion** — Multiple theme toggles (Home header, Settings header, Settings list) allowed switching to a poorly styled light palette; status bar did not follow theme consistently.
+
+### Fixes applied
+
+- **Clear All Notes:** Use `notes.map(n => n.id)` from `useNotes()` context and pass IDs to `deleteMultiple()`.
+- **Export Notes:** Installed `expo-file-system` and `expo-sharing`; wired `ExportService.exportToJSON()`, write to cache, open native share sheet; fallback to React Native `Share` API on platforms without file sharing.
+- **Duplicate headers:** Set `headerShown: false` on Settings, Create, Archive, and Detail in `RootNavigator.js`.
+- **Safe area:** Added `ScreenContainer` component using `SafeAreaView` from `react-native-safe-area-context`; migrated all screens to use it.
+- **FAB / list padding:** Added `bottom` prop to `FAB`; HomeScreen uses `useSafeAreaInsets()` for FAB position and FlatList bottom padding.
+- **Dark mode locked:** Removed all theme toggles from Home and Settings; `ThemeContext` always uses dark mode and migrates stored light preference back to dark.
+- **Android status bar:** Updated `android/app/src/main/res/values/styles.xml` `statusBarColor` to `#0D1117` to match dark theme `bg_dark`.
+
+### Files repaired
+
+- `src/screens/SettingsScreen.js`
+- `src/screens/HomeScreen.js`
+- `src/screens/SearchScreen.js`
+- `src/screens/CreateScreen.js`
+- `src/screens/ArchiveScreen.js`
+- `src/screens/DetailScreen.js`
+- `src/navigation/RootNavigator.js`
+- `src/context/ThemeContext.js`
+- `src/components/ScreenContainer.js` (new)
+- `src/components/FAB.js`
+- `src/components/index.js`
+- `android/app/src/main/res/values/styles.xml`
+- `package.json` (added `expo-file-system`, `expo-sharing`)
+
+### Methods used
+
+- Inspected source files with `read_file` and codebase search (`grep`) to trace broken handlers and layout patterns.
+- Compared `getStatistics()` return shape against SettingsScreen usage to identify the Clear All Notes bug.
+- Verified `ExportService` was implemented but unreferenced; added file write + share flow with Expo modules.
+- Created a shared `ScreenContainer` wrapper to apply consistent safe-area insets across screens.
+- Used `useSafeAreaInsets()` for dynamic FAB and scroll content bottom padding on notched devices.
+- Ran `npx expo install expo-file-system expo-sharing` for SDK-compatible dependencies.
+- Validated changes with `npm run lint`.
+
+### Current status
+
+- Clear All Notes and Export Notes are functional from Settings.
+- Settings shows a single header (no duplicate title/back affordance).
+- App content respects top and bottom safe areas on phone-sized screens.
+- Theme is locked to dark mode with no user-facing toggle.
+

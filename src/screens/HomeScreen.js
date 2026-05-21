@@ -1,48 +1,91 @@
-﻿/**
+/**
  * Home Screen
- * Main note list view with Tony Stark-style UI
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, {
+    useCallback,
+    useMemo,
+    useState,
+    useEffect
+} from 'react';
 import {
-    SafeAreaView,
     View,
     StyleSheet,
     FlatList,
     Text,
-    StatusBar,
     TouchableOpacity,
 } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import {
+    useSafeAreaInsets
+} from 'react-native-safe-area-context';
+import {
+    useFocusEffect
+} from '@react-navigation/native';
+import {
+    MaterialCommunityIcons
+} from '@expo/vector-icons';
+import Animated, {
+    FadeInDown
+} from 'react-native-reanimated';
 
-import { THEME } from '@utils/theme';
-import { useNotes } from '@hooks/useNotes';
-import { useResponsive, useResponsiveFontSize } from '@hooks/useResponsive';
-import { useFadeIn, useFloating } from '@hooks/useAnimations';
-import { useTheme } from '@context/ThemeContext';
+import {
+    THEME
+} from '@utils/theme';
+import {
+    useNotes
+} from '@hooks/useNotes';
+import {
+    useResponsive,
+    useResponsiveFontSize
+} from '@hooks/useResponsive';
+import {
+    useFadeIn,
+    useFloating
+} from '@hooks/useAnimations';
+import {
+    useTheme
+} from '@context/ThemeContext';
 import NoteCard from '@components/NoteCard';
 import SearchBar from '@components/SearchBar';
 import FAB from '@components/FAB';
 import LoadingSpinner from '@components/LoadingSpinner';
 import EmptyState from '@components/EmptyState';
-import { logger } from '@utils/logger';
+import ScreenContainer from '@components/ScreenContainer';
+import {
+    logger
+} from '@utils/logger';
 
-const HomeScreen = ({ navigation }) => {
-    const { notes, loading, getPinnedNotes, getRegularNotes, togglePin, deleteNote } = useNotes();
+const HomeScreen = ({
+    navigation
+}) => {
+    const {
+        notes,
+        loading,
+        getPinnedNotes,
+        getRegularNotes,
+        togglePin,
+        deleteNote
+    } = useNotes();
     const [searchQuery, setSearchQuery] = useState('');
-    
-    // Responsive design
-    const { width, isMobile, isTablet, isDesktop } = useResponsive();
+
+    const {
+        isTablet
+    } = useResponsive();
     const responsiveFontSize = useResponsiveFontSize(THEME.fontSizes.xl);
-    
-    // Theme context for dynamic colors
-    const { colors, shadows, isDarkMode, toggleTheme } = useTheme();
-    
-    // Animations
-    const { animatedStyle: fadeInStyle, startAnimation: startFadeIn } = useFadeIn();
-    const { animatedStyle: floatingStyle, startFloating } = useFloating();
+    const insets = useSafeAreaInsets();
+    const {
+        colors,
+        shadows
+    } = useTheme();
+
+    const {
+        animatedStyle: fadeInStyle,
+        startAnimation: startFadeIn
+    } = useFadeIn();
+    const {
+        animatedStyle: floatingStyle,
+        startFloating
+    } = useFloating();
 
     useEffect(() => {
         startFadeIn();
@@ -51,7 +94,7 @@ const HomeScreen = ({ navigation }) => {
 
     useFocusEffect(
         useCallback(() => {
-            logger.log('🏠 HomeScreen focused');
+            logger.log('HomeScreen focused');
         }, []),
     );
 
@@ -69,20 +112,25 @@ const HomeScreen = ({ navigation }) => {
 
     const handleNotePress = useCallback(
         (note) => {
-            navigation.navigate('Detail', { note });
-        }, [navigation],
+            navigation.navigate('Detail', {
+                note
+            });
+        },
+        [navigation],
     );
 
     const handleCreatePress = useCallback(() => {
-        navigation.navigate('Create', { initialData: { title: '', content: '', tags: [] } });
+        navigation.navigate('Create', {
+            initialData: {
+                title: '',
+                content: '',
+                tags: []
+            }
+        });
     }, [navigation]);
 
     const handleSearchPress = useCallback(() => {
         navigation.navigate('Search');
-    }, [navigation]);
-
-    const handleSettingsPress = useCallback(() => {
-        navigation.navigate('Settings');
     }, [navigation]);
 
     if (loading) {
@@ -91,62 +139,65 @@ const HomeScreen = ({ navigation }) => {
 
     const noteListData =
         pinnedNotes.length > 0 ?
-        [
-            { type: 'header', title: `📌 Pinned (${pinnedNotes.length})` },
-            ...pinnedNotes.map((n) => ({ type: 'note', data: n })),
-            { type: 'header', title: `📝 All Notes (${filteredRegular.length})` },
-            ...filteredRegular.map((n) => ({ type: 'note', data: n })),
+        [{
+                type: 'header',
+                title: `Pinned (${pinnedNotes.length})`
+            },
+            ...pinnedNotes.map((n) => ({
+                type: 'note',
+                data: n
+            })),
+            {
+                type: 'header',
+                title: `All Notes (${filteredRegular.length})`
+            },
+            ...filteredRegular.map((n) => ({
+                type: 'note',
+                data: n
+            })),
         ] :
-        [
-            { type: 'header', title: `📝 All Notes (${filteredRegular.length})` },
-            ...filteredRegular.map((n) => ({ type: 'note', data: n })),
+        [{
+                type: 'header',
+                title: `All Notes (${filteredRegular.length})`
+            },
+            ...filteredRegular.map((n) => ({
+                type: 'note',
+                data: n
+            })),
         ];
 
-    return (
-        <SafeAreaView style={[styles.container, { backgroundColor: colors.bg_dark }]}>
-            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={colors.bg_dark} />
+    const fabBottom = insets.bottom + THEME.spacing.xl;
+    const listBottomPadding = insets.bottom + THEME.spacing.xxl + 56;
 
-            <Animated.View style={[styles.header, fadeInStyle, { backgroundColor: colors.bg_dark, borderBottomColor: colors.border_medium }]}>
+    return (
+        <ScreenContainer>
+            <Animated.View style={[styles.header, fadeInStyle, {
+                backgroundColor: colors.bg_dark,
+                borderBottomColor: colors.border_medium
+            }]}>
                 <View style={styles.headerLeft}>
-                    <Animated.View style={[styles.arcReactorIcon, floatingStyle, { backgroundColor: colors.primary, ...shadows.glow }]}>
+                    <Animated.View style={[styles.arcReactorIcon, floatingStyle, {
+                        backgroundColor: colors.primary,
+                        ...shadows.glow
+                    }]}>
                         <MaterialCommunityIcons name="flash" size={20} color={colors.text_inverse} />
                     </Animated.View>
-                    <Text style={[styles.headerTitle, { fontSize: responsiveFontSize, color: colors.text_primary }]}>Neuron Sparks</Text>
+                    <Text style={[styles.headerTitle, {
+                        fontSize: responsiveFontSize,
+                        color: colors.text_primary
+                    }]}>Neuron Sparks</Text>
                 </View>
-                <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
-                    <MaterialCommunityIcons name={isDarkMode ? 'white-balance-sunny' : 'moon-waning-crescent'} size={24} color={colors.text_primary} />
-                </TouchableOpacity>
                 <View style={styles.headerActions}>
-                    <TouchableOpacity 
-                        onPress={handleSearchPress} 
-                        hitSlop={10}
-                        style={styles.headerButton}
-                    >
-                        <MaterialCommunityIcons
-                            name="magnify"
-                            size={24}
-                            color={colors.text_primary}
-                        />
+                    <TouchableOpacity onPress={handleSearchPress} hitSlop={10} style={styles.headerButton}>
+                        <MaterialCommunityIcons name="magnify" size={24} color={colors.text_primary} />
                     </TouchableOpacity>
-                    <TouchableOpacity 
-                        onPress={() => navigation.navigate('Settings')} 
-                        hitSlop={10}
-                        style={styles.headerButton}
-                    >
-                        <MaterialCommunityIcons
-                            name="cog"
-                            size={24}
-                            color={colors.text_primary}
-                        />
+                    <TouchableOpacity onPress={() => navigation.navigate('Settings')} hitSlop={10} style={styles.headerButton}>
+                        <MaterialCommunityIcons name="cog" size={24} color={colors.text_primary} />
                     </TouchableOpacity>
                 </View>
             </Animated.View>
 
-            <SearchBar
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                placeholder="Search notes..."
-            />
+            <SearchBar value={searchQuery} onChangeText={setSearchQuery} placeholder="Search notes..." />
 
             {notes.length === 0 ? (
                 <EmptyState
@@ -187,22 +238,20 @@ const HomeScreen = ({ navigation }) => {
                             </Animated.View>
                         );
                     }}
-                    contentContainerStyle={styles.listContent}
+                    contentContainerStyle={[styles.listContent, { paddingBottom: listBottomPadding }]}
+                    key={isTablet ? 'grid' : 'list'}
                     scrollEnabled
                     numColumns={isTablet ? 2 : 1}
                     columnWrapperStyle={isTablet ? styles.row : null}
                 />
             )}
 
-            <FAB icon="plus" onPress={handleCreatePress} />
-        </SafeAreaView>
+            <FAB icon="plus" onPress={handleCreatePress} bottom={fabBottom} />
+        </ScreenContainer>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -215,7 +264,7 @@ const styles = StyleSheet.create({
     headerLeft: {
         flexDirection: 'row',
         alignItems: 'center',
-        flex: 1,
+        flex: 1
     },
     arcReactorIcon: {
         width: 36,
@@ -227,19 +276,15 @@ const styles = StyleSheet.create({
     },
     headerTitle: {
         fontSize: THEME.fontSizes.lg,
-        fontWeight: THEME.fontWeights.semibold,
-    },
-    themeToggle: {
-        padding: THEME.spacing.sm,
-        marginRight: THEME.spacing.md,
+        fontWeight: THEME.fontWeights.semibold
     },
     headerActions: {
         flexDirection: 'row',
-        alignItems: 'center',
+        alignItems: 'center'
     },
     headerButton: {
         padding: THEME.spacing.sm,
-        marginLeft: THEME.spacing.sm,
+        marginLeft: THEME.spacing.sm
     },
     sectionHeader: {
         paddingHorizontal: THEME.spacing.md,
@@ -248,14 +293,14 @@ const styles = StyleSheet.create({
     },
     sectionTitle: {
         fontSize: THEME.fontSizes.sm,
-        fontWeight: THEME.fontWeights.semibold,
+        fontWeight: THEME.fontWeights.semibold
     },
     listContent: {
-        paddingBottom: THEME.spacing.xxl,
+        paddingBottom: THEME.spacing.xxl
     },
     row: {
         justifyContent: 'space-between',
-        paddingHorizontal: THEME.spacing.md,
+        paddingHorizontal: THEME.spacing.md
     },
 });
 
