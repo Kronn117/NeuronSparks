@@ -4,6 +4,8 @@
  */
 
 // Screen Names - Must match navigation setup
+export const APP_VERSION = '1.0.2';
+
 export const SCREEN_NAMES = {
     HOME: 'Home',
     CREATE: 'Create',

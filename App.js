@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
-import { LogBox } from 'react-native';
+import { LogBox, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { logger } from '@utils/logger';
 import RootNavigator from '@navigation/RootNavigator';
+import { THEME } from './src/utils/theme';
 import { NoteContextProvider } from '@context/NoteContext';
 import { SearchContextProvider } from '@context/SearchContext';
 import { ThemeContextProvider } from '@context/ThemeContext';
@@ -29,6 +30,7 @@ if (__DEV__) {
  */
 const App = () => {
     const [appIsReady, setAppIsReady] = React.useState(false);
+    const [appLoadError, setAppLoadError] = React.useState(null);
 
     useEffect(() => {
         async function prepare() {
@@ -44,6 +46,7 @@ const App = () => {
                 logger.log('✅ App initialization complete');
             } catch (error) {
                 logger.error('❌ App initialization failed:', error);
+                setAppLoadError(error);
             } finally {
                 await SplashScreen.hideAsync();
             }
@@ -52,25 +55,63 @@ const App = () => {
         prepare();
     }, []);
 
+    if (appLoadError) {
+        return ( <
+            View style = { styles.errorContainer } >
+            <
+            Text style = { styles.errorTitle } > App failed to start < /Text> <
+            Text style = { styles.errorMessage } > { appLoadError.message || 'Unexpected startup error' } < /Text> < /
+            View >
+        );
+    }
+
     if (!appIsReady) {
         return null;
     }
 
-    return (
-        <ErrorBoundary>
-            <SafeAreaProvider>
-                <ThemeContextProvider>
-                    <SettingsContextProvider>
-                        <NoteContextProvider>
-                            <SearchContextProvider>
-                                <RootNavigator />
-                            </SearchContextProvider>
-                        </NoteContextProvider>
-                    </SettingsContextProvider>
-                </ThemeContextProvider>
-            </SafeAreaProvider>
-        </ErrorBoundary>
+    return ( <
+        ErrorBoundary >
+        <
+        SafeAreaProvider >
+        <
+        ThemeContextProvider >
+        <
+        SettingsContextProvider >
+        <
+        NoteContextProvider >
+        <
+        SearchContextProvider >
+        <
+        RootNavigator / >
+        <
+        /SearchContextProvider> < /
+        NoteContextProvider > <
+        /SettingsContextProvider> < /
+        ThemeContextProvider > <
+        /SafeAreaProvider> < /
+        ErrorBoundary >
     );
 };
+
+const styles = StyleSheet.create({
+    errorContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 24,
+        backgroundColor: THEME.colors.bg_dark,
+    },
+    errorTitle: {
+        color: THEME.colors.text_inverse,
+        fontSize: 22,
+        fontWeight: '700',
+        marginBottom: 12,
+    },
+    errorMessage: {
+        color: THEME.colors.text_secondary,
+        fontSize: 16,
+        textAlign: 'center',
+    },
+});
 
 export default App;

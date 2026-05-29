@@ -14,7 +14,7 @@ export const ExportService = {
         /**
          * Export notes to JSON format
          * @param {Array} notes - Notes to export
-         * @returns {object} Exported data
+         * @returns {string} JSON string
          */
         exportToJSON: async notes => {
             try {
@@ -43,15 +43,13 @@ export const ExportService = {
             try {
                 logger.log(`📤 Exporting ${notes.length} notes to CSV`);
 
-                // CSV headers
                 const headers = ['ID', 'Title', 'Content', 'Tags', 'Color', 'Pinned', 'Archived', 'Created', 'Updated'];
                 const rows = [headers];
 
-                // Add note rows
                 notes.forEach(note => {
                     rows.push([
                         note.id,
-                        `"${(note.title || '').replace(/"/g, '""')}"`, // Escape quotes
+                        `"${(note.title || '').replace(/"/g, '""')}"`,
                         `"${(note.content || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
                         `"${(note.tags || []).join(', ')}"`,
                         note.color,
@@ -90,77 +88,100 @@ export const ExportService = {
 
                                 if (note.tags && note.tags.length > 0) {
                                     markdown += `**Tags:** ${note.tags.map(tag => `\`${tag}\``).join(', ')}\n`;
+                }
+
+                markdown += '\n';
+                markdown += note.content || '*No content*';
+                markdown += '\n\n---\n\n';
+            });
+
+            return markdown;
+        } catch (error) {
+            logger.error('❌ Markdown export error:', error);
+            throw error;
         }
+    },
 
-        markdown += '\n';
-        markdown += note.content || '*No content*';
-        markdown += '\n\n---\n\n';
-      });
+    /**
+     * Export notes to PDF format
+     * Note: Placeholder for future implementation with a PDF library
+     * @param {Array} notes - Notes to export
+     * @returns {Promise} PDF export result
+     */
+    exportToPDF: async notes => {
+        try {
+            logger.log(`📤 Exporting ${notes.length} notes to PDF (not yet implemented)`);
+            throw new Error('PDF export not yet implemented');
+        } catch (error) {
+            logger.error('❌ PDF export error:', error);
+            throw error;
+        }
+    },
 
-      return markdown;
-    } catch (error) {
-      logger.error('❌ Markdown export error:', error);
-      throw error;
-    }
-  },
+    /**
+     * Export all notes and settings as backup
+     * @returns {Promise<string>} Backup JSON string
+     */
+    createFullBackup: async () => {
+        try {
+            logger.log('📦 Creating full backup');
 
-  /**
-   * Export notes to PDF format
-   * Note: Placeholder for future implementation with a PDF library
-   * @param {Array} notes - Notes to export
-   * @returns {Promise} PDF export result
-   */
-  exportToPDF: async notes => {
-    try {
-      logger.log(`📤 Exporting ${notes.length} notes to PDF (not yet implemented)`);
-      // TODO: Implement with react-native-pdf or similar
-      throw new Error('PDF export not yet implemented');
-    } catch (error) {
-      logger.error('❌ PDF export error:', error);
-      throw error;
-    }
-  },
+            const notes = await StorageService.getAllNotes();
+            const settings = await StorageService.getSettings();
 
-  /**
-   * Export all notes and settings as backup
-   * @returns {Promise<string>} Backup JSON string
-   */
-  createFullBackup: async () => {
-    try {
-      logger.log('📦 Creating full backup');
+            const backup = {
+                version: '1.0.0',
+                backupDate: new Date().toISOString(),
+                dataVersion: '1.0.0',
+                notes,
+                settings,
+            };
 
-      const notes = await StorageService.getAllNotes();
-      const settings = await StorageService.getSettings();
+            return JSON.stringify(backup, null, 2);
+        } catch (error) {
+            logger.error('❌ Full backup error:', error);
+            throw error;
+        }
+    },
 
-      const backup = {
-        version: '1.0.0',
-        backupDate: new Date().toISOString(),
-        dataVersion: '1.0.0',
-        notes,
-        settings,
-      };
+    /**
+     * Restore notes and settings from backup JSON data
+     * @param {string|object} backupData - Backup string or object
+     * @returns {Promise<object>} Restored backup data
+     */
+    restoreBackup: async backupData => {
+        try {
+            logger.log('📥 Restoring backup data');
 
-      return JSON.stringify(backup, null, 2);
-    } catch (error) {
-      logger.error('❌ Full backup error:', error);
-      throw error;
-    }
-  },
+            const payload = typeof backupData === 'string' ? JSON.parse(backupData) : backupData;
 
-  /**
-   * Get export filename with timestamp
-   * @param {string} format - Export format ('json', 'csv', 'md')
-   * @returns {string} Filename
-   */
-  getExportFilename: format => {
-    const timestamp = new Date().toISOString().split('T')[0];
-    const formatExt = {
-      json: 'json',
-      csv: 'csv',
-      markdown: 'md',
-      md: 'md',
-    };
+            if (!payload || !Array.isArray(payload.notes)) {
+                throw new Error('Invalid backup format');
+            }
 
-    return `neuron-sparks-${timestamp}.${formatExt[format] || 'txt'}`;
-  },
+            await StorageService.importBackup(payload);
+            return payload;
+        } catch (error) {
+            logger.error('❌ Backup restore error:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Get export filename with timestamp
+     * @param {string} format - Export format ('json', 'csv', 'md', 'backup')
+     * @returns {string} Filename
+     */
+    getExportFilename: format => {
+        const timestamp = new Date().toISOString().split('T')[0];
+        const formatExt = {
+            json: 'json',
+            csv: 'csv',
+            markdown: 'md',
+            md: 'md',
+            backup: 'json',
+        };
+
+        return `neuron-sparks-${timestamp}.${formatExt[format] || 'txt'}`;
+    },
 };

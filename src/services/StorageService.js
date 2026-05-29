@@ -9,10 +9,6 @@ import { logger } from '@utils/logger';
 import {
     safeGetItem,
     safeSetItem,
-    safeRemoveItem,
-    safeMultiGet,
-    safeMultiSet,
-    safeMultiRemove,
     safeGetAllKeys,
 } from '@utils/storage';
 import { STORAGE_KEYS } from '@utils/constants';
@@ -171,6 +167,52 @@ export const StorageService = {
         } catch (error) {
             logger.error('❌ Failed to delete notes:', error);
             throw new StorageError('Failed to delete notes', { originalError: error });
+        }
+    },
+
+    /**
+     * Clear all notes
+     * @returns {Promise<boolean>} Success status
+     */
+    clearNotes: async() => {
+        try {
+            logger.log('🧹 Clearing all notes');
+            await StorageService.saveNotes([]);
+            return true;
+        } catch (error) {
+            logger.error('❌ Failed to clear notes:', error);
+            throw new StorageError('Failed to clear notes', { originalError: error });
+        }
+    },
+
+    /**
+     * Import backup data and restore notes/settings
+     * @param {string|object} backupData - Backup JSON string or object
+     * @returns {Promise<object>} Restored notes and settings
+     */
+    importBackup: async backupData => {
+        try {
+            logger.log('📥 Importing backup data');
+            const payload = typeof backupData === 'string' ? JSON.parse(backupData) : backupData;
+
+            if (!payload || !Array.isArray(payload.notes)) {
+                throw new StorageError('Invalid backup data format');
+            }
+
+            const notes = payload.notes;
+            const settings = payload.settings || {};
+
+            await StorageService.saveNotes(notes);
+            await StorageService.saveSettings(settings);
+
+            logger.log('✅ Backup imported successfully');
+            return { notes, settings };
+        } catch (error) {
+            logger.error('❌ Failed to import backup:', error);
+            if (error instanceof StorageError) {
+                throw error;
+            }
+            throw new StorageError('Failed to import backup', { originalError: error });
         }
     },
 

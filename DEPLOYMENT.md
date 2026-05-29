@@ -21,6 +21,8 @@
 - `eas build --platform android --profile production`
 - `eas build --platform ios --profile production`
 
+> When building locally for Android, the release APK is generated in `android/app/build/outputs/apk/release/app-release.apk`.
+
 ## App Store Release
 
 1. Update `app.json` version and build metadata

@@ -3,6 +3,8 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
+// Force React Native resolution through the short junction path to avoid Windows path-length issues.
+ext.REACT_NATIVE_NODE_MODULES_DIR = file("${rootDir}/../node_modules/react-native").getAbsolutePath()
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -91,8 +93,8 @@ android {
         applicationId 'com.neuronsparks.app'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
-        versionName "1.0.2"
+        versionCode 4
+        versionName "1.00.03"
     }
     signingConfigs {
         debug {

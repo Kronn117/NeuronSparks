@@ -8,6 +8,7 @@ import React, { createContext, useReducer, useEffect, useCallback } from 'react'
 import { logger } from '@utils/logger';
 import { StorageService } from '@services/StorageService';
 import { ValidationService } from '@services/ValidationService';
+import { AnalyticsService } from '@services/AnalyticsService';
 import { generateId } from '@utils/helpers';
 import { SORT_OPTIONS, DEFAULT_SORT } from '@utils/constants';
 
@@ -223,6 +224,7 @@ export const NoteContextProvider = ({ children }) => {
 
             // Update state
             dispatch({ type: ACTIONS.ADD_NOTE, payload: normalized });
+            AnalyticsService.trackNoteCreated(normalized.id, normalized.wordCount);
 
             logger.log('✅ Note added successfully');
             return normalized;
@@ -268,6 +270,7 @@ export const NoteContextProvider = ({ children }) => {
 
             // Update state
             dispatch({ type: ACTIONS.UPDATE_NOTE, payload: normalized });
+            AnalyticsService.trackNoteUpdated(normalized.id, normalized.wordCount);
 
             logger.log('✅ Note updated successfully');
             return normalized;
@@ -293,6 +296,7 @@ export const NoteContextProvider = ({ children }) => {
 
             // Update state
             dispatch({ type: ACTIONS.DELETE_NOTE, payload: noteId });
+            AnalyticsService.trackNoteDeleted(noteId);
 
             logger.log('✅ Note deleted successfully');
         } catch (error) {
@@ -339,6 +343,7 @@ export const NoteContextProvider = ({ children }) => {
             await StorageService.updateNote(noteId, updated);
 
             dispatch({ type: ACTIONS.TOGGLE_PIN, payload: noteId });
+            AnalyticsService.trackNotePinned(noteId, updated.isPinned);
         } catch (error) {
             logger.error('❌ Toggle pin error:', error);
             throw error;
@@ -359,6 +364,7 @@ export const NoteContextProvider = ({ children }) => {
             await StorageService.updateNote(noteId, updated);
 
             dispatch({ type: ACTIONS.TOGGLE_ARCHIVE, payload: noteId });
+            AnalyticsService.trackNoteArchived(noteId, updated.isArchived);
         } catch (error) {
             logger.error('❌ Toggle archive error:', error);
             throw error;

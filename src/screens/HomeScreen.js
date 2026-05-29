@@ -64,6 +64,7 @@ const HomeScreen = ({
         getPinnedNotes,
         getRegularNotes,
         togglePin,
+        toggleArchive,
         deleteNote
     } = useNotes();
     const [searchQuery, setSearchQuery] = useState('');
@@ -234,6 +235,7 @@ const HomeScreen = ({
                                     onPress={() => handleNotePress(item.data)}
                                     onDelete={deleteNote}
                                     onTogglePin={togglePin}
+                                    onToggleArchive={toggleArchive}
                                 />
                             </Animated.View>
                         );

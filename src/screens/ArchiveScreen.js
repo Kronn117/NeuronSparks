@@ -51,7 +51,8 @@ const ArchiveScreen = () => {
     const navigation = useNavigation();
     const {
         getArchivedNotes,
-        deleteNote
+        deleteNote,
+        toggleArchive
     } = useNotes();
     const archivedNotes = getArchivedNotes();
 
@@ -121,6 +122,7 @@ const ArchiveScreen = () => {
                                 note={item}
                                 onPress={handleNotePress}
                                 onDelete={handleDelete}
+                                onToggleArchive={toggleArchive}
                             />
                         </Animated.View>
                     )}

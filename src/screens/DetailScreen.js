@@ -61,7 +61,8 @@ const DetailScreen = () => {
     const {
         updateNote,
         deleteNote,
-        togglePin
+        togglePin,
+        toggleArchive
     } = useNotes();
 
     const responsiveFontSize = useResponsiveFontSize(THEME.fontSizes.xl);
@@ -171,6 +172,18 @@ const DetailScreen = () => {
         }
     }, [note.id, togglePin]);
 
+    const handleToggleArchive = useCallback(async () => {
+        try {
+            await toggleArchive(note.id);
+            setNote(prev => ({
+                ...prev,
+                isArchived: !prev.isArchived
+            }));
+        } catch (error) {
+            logger.error('Failed to toggle archive:', error);
+        }
+    }, [note.id, toggleArchive]);
+
     if (!note.id) {
         return (
             <ScreenContainer>
@@ -212,6 +225,13 @@ const DetailScreen = () => {
                             name={note.isPinned ? 'pin' : 'pin-outline'}
                             size={24}
                             color={note.isPinned ? colors.primary : colors.text_primary}
+                        />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={handleToggleArchive} style={styles.actionButton}>
+                        <MaterialCommunityIcons
+                            name={note.isArchived ? 'archive-arrow-up-outline' : 'archive-outline'}
+                            size={24}
+                            color={colors.text_primary}
                         />
                     </TouchableOpacity>
                     <TouchableOpacity onPress={handleDelete} style={styles.actionButton}>

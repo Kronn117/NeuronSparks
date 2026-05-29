@@ -64,7 +64,7 @@
   },
   "overrides": [
     {
-      "files": ["babel.config.js"],
+      "files": ["babel.config.js", "jest.config.js", "jest.setup.js"],
       "rules": {
         "import/no-commonjs": "off"
       }

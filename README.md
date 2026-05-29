@@ -44,7 +44,7 @@ NeuronSparks follows a clean Expo workflow with local CLI invocation and explici
 
 ## Development Notes
 
-This project targets a mobile-first experience with Expo SDK 55, React Native 0.85.3, and React 19.2.6.
+This project targets a mobile-first experience with Expo SDK 52, React Native 0.76.9, and React 18.3.1.
 
 ## Methodology
 

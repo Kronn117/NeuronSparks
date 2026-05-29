@@ -5,7 +5,6 @@
 
 import { logger } from '@utils/logger';
 import { validateNote, validateTitle, validateContent, validateTags } from '@utils/validators';
-import { ValidationError } from '@utils/errors';
 
 /**
  * ValidationService - High-level validation operations

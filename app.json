@@ -1,51 +1,51 @@
 {
-  "expo": {
-    "name": "Neuron Sparks",
-    "slug": "neuron-sparks",
-    "version": "1.0.2",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0A0E27"
-    },
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTabletMode": true,
-      "bundleIdentifier": "com.neuronsparks.app",
-      "buildNumber": "1.0.2"
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0A0E27"
-      },
-      "package": "com.neuronsparks.app",
-      "versionCode": 3
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "plugins": [
-      [
-        "expo-font",
-        {
-          "fonts": [
-            "./assets/fonts/JetBrainsMono-Regular.ttf"
-          ]
+    "expo": {
+        "name": "Neuron Sparks",
+        "slug": "neuron-sparks",
+        "version": "1.00.03",
+        "orientation": "portrait",
+        "icon": "./assets/icon.png",
+        "splash": {
+            "image": "./assets/splash.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#0A0E27"
+        },
+        "updates": {
+            "fallbackToCacheTimeout": 0
+        },
+        "assetBundlePatterns": [
+            "**/*"
+        ],
+        "ios": {
+            "supportsTabletMode": true,
+            "bundleIdentifier": "com.neuronsparks.app",
+            "buildNumber": "1.00.03"
+        },
+        "android": {
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/adaptive-icon.png",
+                "backgroundColor": "#0A0E27"
+            },
+            "package": "com.neuronsparks.app",
+            "versionCode": 4
+        },
+        "web": {
+            "favicon": "./assets/favicon.png"
+        },
+        "plugins": [
+            [
+                "expo-font",
+                {
+                    "fonts": [
+                        "./assets/fonts/JetBrainsMono-Regular.ttf"
+                    ]
+                }
+            ]
+        ],
+        "extra": {
+            "eas": {
+                "projectId": "907d2c2e-71da-4aff-835f-ca9e8b23cba4"
+            }
         }
-      ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "907d2c2e-71da-4aff-835f-ca9e8b23cba4"
-      }
     }
-  }
 }

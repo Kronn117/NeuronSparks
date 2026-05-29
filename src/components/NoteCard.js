@@ -6,12 +6,12 @@
 import React, { useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import Animated, { useSharedValue, useAnimatedStyle, withSpring } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
 import { THEME } from '@utils/theme';
 import { truncateText, getTimeAgo } from '@utils/helpers';
 import { usePressAnimation } from '@hooks/useAnimations';
 
-const NoteCard = ({ note, onPress, onDelete, onTogglePin }) => {
+const NoteCard = ({ note, onPress, onDelete, onTogglePin, onToggleArchive }) => {
     const { animatedStyle, onPressIn, onPressOut } = usePressAnimation();
 
     const handleDelete = useCallback(() => {
@@ -37,13 +37,10 @@ const NoteCard = ({ note, onPress, onDelete, onTogglePin }) => {
                 <View
                     style={[
                         styles.colorIndicator,
-                        { 
+                        styles.colorIndicatorGlow,
+                        {
                             backgroundColor: note.color || THEME.colors.note_blue,
                             shadowColor: note.color || THEME.colors.note_blue,
-                            shadowOffset: { width: 0, height: 0 },
-                            shadowOpacity: 0.6,
-                            shadowRadius: 12,
-                            elevation: 8,
                         },
                     ]}
                 />
@@ -98,6 +95,19 @@ const NoteCard = ({ note, onPress, onDelete, onTogglePin }) => {
                                 }
                             />
                         </TouchableOpacity>
+                        {onToggleArchive ? (
+                            <TouchableOpacity
+                                style={styles.actionButton}
+                                onPress={() => onToggleArchive?.(note.id)}
+                                hitSlop={10}
+                            >
+                                <MaterialCommunityIcons
+                                    name={note.isArchived ? 'archive-arrow-up-outline' : 'archive-outline'}
+                                    size={20}
+                                    color={THEME.colors.text_secondary}
+                                />
+                            </TouchableOpacity>
+                        ) : null}
                         <TouchableOpacity onPress={handleDelete} hitSlop={10}>
                             <MaterialCommunityIcons
                                 name="delete-outline"
@@ -130,6 +140,12 @@ const styles = StyleSheet.create({
     },
     colorIndicator: {
         width: 4,
+    },
+    colorIndicatorGlow: {
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.6,
+        shadowRadius: 12,
+        elevation: 8,
     },
     content: {
         flex: 1,

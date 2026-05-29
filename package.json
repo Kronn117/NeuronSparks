@@ -1,19 +1,24 @@
 {
     "name": "neuron-sparks",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "A production-grade sci-fi themed notes application for iOS & Android",
     "main": "node_modules/expo/AppEntry.js",
     "scripts": {
         "preinstall": "node -e \"const [maj,min,patch]=process.versions.node.split('.').map(Number); if(maj<20|| (maj===20&&min<19)|| (maj===20&&min===19&&patch<4)){ console.error('Node 20.19.4 or newer is required. Install a newer Node.js LTS from https://nodejs.org/en/download'); process.exit(1);} \"",
         "start": "npx expo start",
         "dev": "npm run start",
-        "android": "npx expo start --android",
-        "ios": "npx expo start --ios",
+        "android": "npx expo run:android",
+        "ios": "npx expo run:ios",
         "web": "npx expo start --web",
+        "build:android": "eas build --platform android --profile production",
+        "build:ios": "eas build --platform ios --profile production",
         "eject": "npx expo eject",
         "lint": "eslint .",
         "lint:fix": "eslint . --fix",
-        "format": "prettier --write \"src/**/*.{js,jsx,json,css,md}\""
+        "format": "prettier --write \"src/**/*.{js,jsx,json,css,md}\"",
+        "test": "jest",
+        "test:watch": "jest --watch",
+        "test:coverage": "jest --coverage"
     },
     "dependencies": {
         "@expo/metro-runtime": "~4.0.1",
@@ -39,12 +44,17 @@
     "devDependencies": {
         "@babel/core": "^7.20.0",
         "@babel/eslint-parser": "^7.28.6",
+        "@testing-library/jest-native": "^5.0.0",
+        "@testing-library/react-native": "^13.0.0",
         "babel-plugin-module-resolver": "^5.0.0",
         "babel-preset-expo": "~12.0.0",
         "eslint": "^8.30.0",
         "eslint-config-react-native": "^4.0.0",
         "eslint-plugin-react-native": "^4.1.0",
-        "prettier": "^2.8.1"
+        "jest": "^29.0.0",
+        "jest-expo": "~52.0.0",
+        "prettier": "^2.8.1",
+        "react-test-renderer": "18.3.1"
     },
     "private": true,
     "engines": {

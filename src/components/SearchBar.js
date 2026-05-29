@@ -25,7 +25,7 @@ const SearchBar = ({ value, onChangeText, onClear, placeholder = 'Search notes..
         <View
             style={[
                 styles.container,
-                isFocused && { borderColor: THEME.colors.primary, borderWidth: 2 },
+                isFocused && styles.containerFocused,
             ]}
         >
             <MaterialCommunityIcons
@@ -76,6 +76,10 @@ const styles = StyleSheet.create({
         marginVertical: THEME.spacing.md,
         borderWidth: 1,
         borderColor: THEME.colors.border_medium,
+    },
+    containerFocused: {
+        borderColor: THEME.colors.primary,
+        borderWidth: 2,
     },
     icon: {
         marginRight: THEME.spacing.sm,

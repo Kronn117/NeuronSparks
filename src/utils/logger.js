@@ -2,6 +2,7 @@
  * Logging Utility
  * Centralized logging with development/production awareness
  */
+/* eslint-disable no-console */
 
 const isDevelopment = __DEV__;
 

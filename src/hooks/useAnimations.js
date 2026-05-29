@@ -3,16 +3,16 @@
  * Provides common animation utilities for Tony Stark-style interactions
  */
 
-import { useRef, useCallback } from 'react';
-import Animated, {
+import { useCallback } from 'react';
+import {
     useSharedValue,
     useAnimatedStyle,
     withSpring,
     withSequence,
     withTiming,
     withRepeat,
+    withDelay,
     Easing,
-    runOnJS,
 } from 'react-native-reanimated';
 import { THEME } from '@utils/theme';
 
@@ -55,12 +55,12 @@ export const useFadeIn = (delay = 0) => {
 
     const startAnimation = useCallback(() => {
         'worklet';
-        opacity.value = withTiming(1, {
+        opacity.value = withDelay(delay, withTiming(1, {
             duration: THEME.animationDuration.slow,
             easing: Easing.out(Easing.cubic),
-        });
-        translateY.value = withSpring(0, THEME.animationSpring.smooth);
-    }, []);
+        }));
+        translateY.value = withDelay(delay, withSpring(0, THEME.animationSpring.smooth));
+    }, [delay]);
 
     return { animatedStyle, startAnimation };
 };
@@ -121,17 +121,17 @@ export const useSlideIn = (direction = 'right', delay = 0) => {
         if (direction === 'up') translateY.value = -offset;
         if (direction === 'down') translateY.value = offset;
 
-        opacity.value = withTiming(1, {
+        opacity.value = withDelay(delay, withTiming(1, {
             duration: THEME.animationDuration.base,
             easing: Easing.out(Easing.cubic),
-        });
+        }));
 
         if (direction === 'left' || direction === 'right') {
-            translateX.value = withSpring(0, THEME.animationSpring.smooth);
+            translateX.value = withDelay(delay, withSpring(0, THEME.animationSpring.smooth));
         } else {
-            translateY.value = withSpring(0, THEME.animationSpring.smooth);
+            translateY.value = withDelay(delay, withSpring(0, THEME.animationSpring.smooth));
         }
-    }, [direction]);
+    }, [direction, delay]);
 
     return { animatedStyle, startAnimation };
 };

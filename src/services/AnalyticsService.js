@@ -6,8 +6,6 @@
 import { logger } from '@utils/logger';
 import { StorageService } from './StorageService';
 
-const ANALYTICS_STORAGE_KEY = 'app_analytics';
-
 /**
  * AnalyticsService - Event tracking and analytics
  */
@@ -35,6 +33,12 @@ export const AnalyticsService = {
             if (analytics.length > 1000) {
                 analytics.shift();
             }
+
+            const settings = await StorageService.getSettings();
+            await StorageService.saveSettings({
+                ...settings,
+                analytics,
+            });
 
             return true;
         } catch (error) {

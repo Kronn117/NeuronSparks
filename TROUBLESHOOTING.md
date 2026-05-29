@@ -8,6 +8,16 @@
 - Verify `package.json` scripts reference Expo correctly
 - Use local CLI invocation: `npm run start` instead of a global `expo` command
 
+### Release APK Startup Crashes
+
+If the installed release APK crashes immediately:
+
+- Run `adb logcat -c` then `adb logcat -v threadtime *:S ReactNative:V com.neuronsparks.app:V` while launching the app.
+- Check for `Unable to load script` or `native call exception` errors.
+- Confirm the release bundle exists at `android/app/build/generated/assets/createBundleReleaseJsAndAssets/index.android.bundle`.
+- Verify assets like `assets/fonts/JetBrainsMono-Regular.ttf` are included in the APK.
+- If the crash occurs during splash screen init, ensure `MainActivity.kt` calls `super.onCreate(savedInstanceState)` and `MainApplication.kt` is using Expo's ReactNativeHost wrapper.
+
 ## Notes Not Persisting
 
 - Confirm AsyncStorage writes succeed
