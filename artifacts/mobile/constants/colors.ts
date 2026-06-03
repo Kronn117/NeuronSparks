@@ -1,0 +1,62 @@
+const colors = {
+  dark: {
+    text: '#e0e0ff',
+    tint: '#00f5ff',
+    background: '#0a0a0f',
+    foreground: '#e0e0ff',
+    card: '#14141f',
+    cardForeground: '#e0e0ff',
+    primary: '#00f5ff',
+    primaryForeground: '#0a0a0f',
+    secondary: '#1a1a28',
+    secondaryForeground: '#e0e0ff',
+    muted: '#1a1a28',
+    mutedForeground: '#6060a0',
+    accent: '#9b4dff',
+    accentForeground: '#ffffff',
+    destructive: '#ff3355',
+    destructiveForeground: '#ffffff',
+    border: '#2a2a3f',
+    input: '#2a2a3f',
+
+    // Cyberpunk accent palette
+    cyan: '#00f5ff',
+    magenta: '#ff00aa',
+    violet: '#9b4dff',
+    green: '#39ff14',
+    amber: '#ffaa00',
+    red: '#ff3355',
+  },
+
+  light: {
+    text: '#1a1a2e',
+    tint: '#0055bb',
+    background: '#f2f2ff',
+    foreground: '#1a1a2e',
+    card: '#ffffff',
+    cardForeground: '#1a1a2e',
+    primary: '#0055bb',
+    primaryForeground: '#ffffff',
+    secondary: '#e8e8f8',
+    secondaryForeground: '#1a1a2e',
+    muted: '#eaeaf8',
+    mutedForeground: '#7070a0',
+    accent: '#5500cc',
+    accentForeground: '#ffffff',
+    destructive: '#cc0033',
+    destructiveForeground: '#ffffff',
+    border: '#cccce0',
+    input: '#cccce0',
+
+    cyan: '#0088cc',
+    magenta: '#bb0077',
+    violet: '#5500cc',
+    green: '#006622',
+    amber: '#bb6600',
+    red: '#cc0033',
+  },
+
+  radius: 10,
+};
+
+export default colors;

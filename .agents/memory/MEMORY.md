@@ -1,0 +1,1 @@
+- [Expo theme dark-mode on web](expo-theme-web.md) — Appearance.setColorScheme crashes on web; use a React ThemeContext instead of useColorScheme().
