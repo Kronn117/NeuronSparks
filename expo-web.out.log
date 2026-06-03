@@ -1,0 +1,8 @@
+
+> neuro-sparks@1.0.2 web
+> npx expo start --web --port 8081 --host localhost
+
+Starting project at C:\Users\wwwze\Desktop\Mobile App Dev\NeuronSparks - 2
+Starting Metro Bundler
+Waiting on http://localhost:8081
+Logs for your project will appear below.
