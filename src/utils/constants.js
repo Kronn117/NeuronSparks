@@ -1,6 +1,17 @@
 /**
+ * ============================================================================
  * Application-wide Constants
- * Screen names, default values, configuration constants
+ * ============================================================================
+ *
+ * @file constants.js
+ * @description Central repository for magic-free constant values used across
+ * the app: screen names, app version, default settings, storage keys,
+ * validation rules, search config, default tags, note colours, and UI
+ * configuration.
+ *
+ * @see RootNavigator.js   - SCREEN_NAMES
+ * @see NoteContext.js      - DEFAULT_SORT
+ * @see StorageService.js   - STORAGE_KEYS
  */
 
 // Screen Names - Must match navigation setup

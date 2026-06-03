@@ -1,7 +1,24 @@
 /**
+ * ============================================================================
  * Storage Service
- * Abstracts AsyncStorage operations and provides high-level data access
- * RULE: All storage operations must go through this service, never direct AsyncStorage calls
+ * ============================================================================
+ *
+ * @file StorageService.js
+ * @description Centralised abstraction over AsyncStorage.  Every read/write
+ * operation in the app MUST flow through this service — never call
+ * AsyncStorage directly from components or contexts.
+ *
+ * Provides high-level CRUD for notes, plus helpers for settings, search
+ * history, backups, and import/export.  All methods throw `StorageError`
+ * (from `src/utils/errors.js`) on failure so callers can differentiate
+ * storage issues from other error types.
+ *
+ * RULE: All storage operations must go through this service,
+ *       never direct AsyncStorage calls.
+ *
+ * @see src/utils/storage.js    - safeGetItem, safeSetItem, safeGetAllKeys
+ * @see src/utils/constants.js  - STORAGE_KEYS
+ * @see src/utils/errors.js     - StorageError
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -15,8 +32,7 @@ import { STORAGE_KEYS } from '@utils/constants';
 import { StorageError } from '@utils/errors';
 
 /**
- * StorageService - Centralized storage management
- * Provides abstraction over AsyncStorage for notes and settings
+ * StorageService singleton — all methods are async unless noted.
  */
 export const StorageService = {
     /**

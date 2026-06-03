@@ -1,15 +1,24 @@
 /**
+ * ============================================================================
  * Notification Service
- * Handles local notifications and alerts
- * Placeholder for future push notifications implementation
+ * ============================================================================
+ *
+ * @file NotificationService.js
+ * @description Wrapper around React Native's `Alert` API with convenience
+ * helpers for success / error / warning / info toasts and destructive
+ * confirmations.  Currently all "toast" methods fall back to `Alert.alert`;
+ * a future iteration will swap them for a proper toast component.
+ *
+ * Placeholder methods exist for local push notifications (to be implemented
+ * with `react-native-notifications` or Expo Notifications).
+ *
+ * @see src/utils/logger.js
  */
 
 import { logger } from '@utils/logger';
 import { Alert } from 'react-native';
 
-/**
- * NotificationService - Notification operations
- */
+/** NotificationService singleton — all methods are synchronous unless noted. */
 export const NotificationService = {
     /**
      * Show alert dialog

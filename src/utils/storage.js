@@ -1,8 +1,17 @@
 /**
+ * ============================================================================
  * Storage Helper Functions
- * Utility functions for AsyncStorage operations
- * NOTE: Do NOT use these directly - use StorageService instead
- * These are low-level helpers for StorageService to use
+ * ============================================================================
+ *
+ * @file storage.js
+ * @description Low-level AsyncStorage wrappers with built-in JSON
+ * serialisation and error handling.  These are **private** helpers
+ * consumed by `StorageService` — components and contexts should NOT
+ * import them directly.
+ *
+ * NOTE: Do NOT use these directly — use StorageService instead.
+ *
+ * @see src/services/StorageService.js
  */
 
 import AsyncStorage from '@react-native-async-storage/async-storage';

@@ -1,14 +1,22 @@
 /**
+ * ============================================================================
  * Analytics Service
- * Tracks user events and app usage
+ * ============================================================================
+ *
+ * @file AnalyticsService.js
+ * @description Lightweight in-app analytics that persists event data to
+ * AsyncStorage via StorageService.  Events are capped at the most recent
+ * 1 000 entries to keep storage footprint small.
+ *
+ * Tracked events: note CRUD, search, export, session start/end.
+ *
+ * @see StorageService - Reads/writes analytics array inside settings
  */
 
 import { logger } from '@utils/logger';
 import { StorageService } from './StorageService';
 
-/**
- * AnalyticsService - Event tracking and analytics
- */
+/** AnalyticsService singleton — all methods are async. */
 export const AnalyticsService = {
     /**
      * Track a generic event

@@ -1,6 +1,14 @@
 /**
+ * ============================================================================
  * Helper Functions
- * Utility functions for IDs, dates, text formatting, etc.
+ * ============================================================================
+ *
+ * @file helpers.js
+ * @description Miscellaneous utility functions: unique-ID generation,
+ * date/time formatting ("time ago"), text truncation, word counting,
+ * colour manipulation, and deep cloning.
+ *
+ * All functions are pure (no side-effects).
  */
 
 /**

@@ -1,5 +1,21 @@
 /**
+ * ============================================================================
  * Search Screen
+ * ============================================================================
+ *
+ * @file SearchScreen.js
+ * @description Full-screen search interface with:
+ *   - Auto-focused text input for live filtering by title, content, or tags.
+ *   - Horizontal tag-chip filter bar (dynamically built from all existing tags).
+ *   - Responsive FlatList (1 col phone / 2 col tablet) using the dynamic-key
+ *     pattern (same as HomeScreen).
+ *
+ * Filtering logic:
+ *   1. Exclude archived notes.
+ *   2. If a text query is present, match against title/content/tags.
+ *   3. If a tag filter is active, further narrow the result set.
+ *
+ * @see NoteCard, EmptyState, ScreenContainer
  */
 
 import React, {
@@ -47,6 +63,11 @@ import NoteCard from '@components/NoteCard';
 import EmptyState from '@components/EmptyState';
 import ScreenContainer from '@components/ScreenContainer';
 
+/**
+ * SearchScreen component — full-text search with tag-based filtering.
+ *
+ * @returns {JSX.Element}
+ */
 const SearchScreen = () => {
     const navigation = useNavigation();
     const {
@@ -71,6 +92,7 @@ const SearchScreen = () => {
         startFadeIn();
     }, [startFadeIn]);
 
+    /** Build a deduplicated list of all tags across non-archived notes. */
     const allTags = useMemo(() => {
         const tagSet = new Set();
         notes.forEach(note => {
@@ -80,6 +102,7 @@ const SearchScreen = () => {
         return Array.from(tagSet);
     }, [notes]);
 
+    /** Apply text-query and tag filters to the notes array. */
     const filteredNotes = useMemo(() => {
         let filtered = notes.filter(note => !note.isArchived);
 
@@ -108,99 +131,142 @@ const SearchScreen = () => {
         });
     }, [navigation]);
 
-    return (
-        <ScreenContainer>
-            <Animated.View style={[styles.header, fadeInStyle, {
+    return ( <
+        ScreenContainer >
+        <
+        Animated.View style = {
+            [styles.header, fadeInStyle, {
                 backgroundColor: colors.bg_dark,
                 borderBottomColor: colors.border_medium
-            }]}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <MaterialCommunityIcons name="arrow-left" size={24} color={colors.text_primary} />
-                </TouchableOpacity>
-                <View style={[styles.searchContainer, { backgroundColor: colors.bg_secondary }]}>
-                    <MaterialCommunityIcons name="magnify" size={20} color={colors.text_tertiary} style={styles.searchIcon} />
-                    <TextInput
-                        style={[styles.searchInput, { color: colors.text_primary }]}
-                        placeholder="Search notes..."
-                        placeholderTextColor={colors.text_tertiary}
-                        value={searchQuery}
-                        onChangeText={setSearchQuery}
-                        autoFocus
-                    />
-                    {searchQuery ? (
-                        <TouchableOpacity onPress={() => setSearchQuery('')}>
-                            <MaterialCommunityIcons name="close-circle" size={20} color={colors.text_tertiary} />
-                        </TouchableOpacity>
-                    ) : null}
-                </View>
-            </Animated.View>
+            }]
+        } >
+        <
+        TouchableOpacity onPress = {
+            () => navigation.goBack() }
+        style = { styles.backButton } >
+        <
+        MaterialCommunityIcons name = "arrow-left"
+        size = { 24 }
+        color = { colors.text_primary }
+        /> <
+        /TouchableOpacity> <
+        View style = {
+            [styles.searchContainer, { backgroundColor: colors.bg_secondary }] } >
+        <
+        MaterialCommunityIcons name = "magnify"
+        size = { 20 }
+        color = { colors.text_tertiary }
+        style = { styles.searchIcon }
+        /> <
+        TextInput style = {
+            [styles.searchInput, { color: colors.text_primary }] }
+        placeholder = "Search notes..."
+        placeholderTextColor = { colors.text_tertiary }
+        value = { searchQuery }
+        onChangeText = { setSearchQuery }
+        autoFocus /
+        > {
+            searchQuery ? ( <
+                TouchableOpacity onPress = {
+                    () => setSearchQuery('') } >
+                <
+                MaterialCommunityIcons name = "close-circle"
+                size = { 20 }
+                color = { colors.text_tertiary }
+                /> <
+                /TouchableOpacity>
+            ) : null
+        } <
+        /View> <
+        /Animated.View>
 
-            {allTags.length > 0 ? (
-                <Animated.View entering={FadeInDown.delay(100).springify()}>
-                    <View style={[styles.tagsSection, { borderBottomColor: colors.border_medium }]}>
-                        <Text style={[styles.tagsTitle, { color: colors.text_secondary }]}>Filter by tag:</Text>
-                        <FlatList
-                            horizontal
-                            data={allTags}
-                            keyExtractor={(tag) => tag}
-                            renderItem={({ item: tag }) => (
-                                <TouchableOpacity
-                                    style={[
-                                        styles.tagChip,
-                                        {
-                                            backgroundColor: colors.bg_secondary,
-                                            borderColor: colors.border_medium
-                                        },
-                                        selectedTag === tag && {
-                                            backgroundColor: colors.primary,
-                                            borderColor: colors.primary
-                                        },
-                                    ]}
-                                    onPress={() => setSelectedTag(selectedTag === tag ? null : tag)}
-                                >
-                                    <Text style={[
-                                        styles.tagChipText,
-                                        { color: colors.text_secondary },
-                                        selectedTag === tag && { color: colors.text_inverse },
-                                    ]}>
-                                        #{tag}
-                                    </Text>
-                                </TouchableOpacity>
-                            )}
-                            showsHorizontalScrollIndicator={false}
-                            contentContainerStyle={styles.tagsList}
-                        />
-                    </View>
-                </Animated.View>
-            ) : null}
+        {
+            allTags.length > 0 ? ( <
+                Animated.View entering = { FadeInDown.delay(100).springify() } >
+                <
+                View style = {
+                    [styles.tagsSection, { borderBottomColor: colors.border_medium }] } >
+                <
+                Text style = {
+                    [styles.tagsTitle, { color: colors.text_secondary }] } > Filter by tag: < /Text> <
+                FlatList horizontal data = { allTags }
+                keyExtractor = {
+                    (tag) => tag }
+                renderItem = {
+                    ({ item: tag }) => ( <
+                        TouchableOpacity style = {
+                            [
+                                styles.tagChip,
+                                {
+                                    backgroundColor: colors.bg_secondary,
+                                    borderColor: colors.border_medium
+                                },
+                                selectedTag === tag && {
+                                    backgroundColor: colors.primary,
+                                    borderColor: colors.primary
+                                },
+                            ]
+                        }
+                        onPress = {
+                            () => setSelectedTag(selectedTag === tag ? null : tag) } >
+                        <
+                        Text style = {
+                            [
+                                styles.tagChipText,
+                                { color: colors.text_secondary },
+                                selectedTag === tag && { color: colors.text_inverse },
+                            ]
+                        } > #{ tag } <
+                        /Text> <
+                        /TouchableOpacity>
+                    )
+                }
+                showsHorizontalScrollIndicator = { false }
+                contentContainerStyle = { styles.tagsList }
+                /> <
+                /View> <
+                /Animated.View>
+            ) : null
+        }
 
-            {filteredNotes.length === 0 ? (
-                <Animated.View entering={FadeInDown.delay(200).springify()}>
-                    <EmptyState
-                        icon="magnify"
-                        title="No Results"
-                        description={searchQuery || selectedTag ? 'Try different search terms or filters' : 'Create some notes to search'}
-                    />
-                </Animated.View>
-            ) : (
-                <FlatList
-                    data={filteredNotes}
-                    keyExtractor={(item) => item.id}
-                    key={isTablet ? 'grid' : 'list'}
-                    renderItem={({ item, index }) => (
-                        <Animated.View entering={FadeInDown.delay(index * 50).springify()}>
-                            <NoteCard note={item} onPress={handleNotePress} />
-                        </Animated.View>
-                    )}
-                    contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + THEME.spacing.xl }]}
-                    numColumns={isTablet ? 2 : 1}
-                    columnWrapperStyle={isTablet ? styles.row : null}
+        {
+            filteredNotes.length === 0 ? ( <
+                Animated.View entering = { FadeInDown.delay(200).springify() } >
+                <
+                EmptyState icon = "magnify"
+                title = "No Results"
+                description = { searchQuery || selectedTag ? 'Try different search terms or filters' : 'Create some notes to search' }
+                /> <
+                /Animated.View>
+            ) : ( <
+                FlatList data = { filteredNotes }
+                keyExtractor = {
+                    (item) => item.id }
+                key = { isTablet ? 'grid' : 'list' }
+                renderItem = {
+                    ({ item, index }) => ( <
+                        Animated.View entering = { FadeInDown.delay(index * 50).springify() } >
+                        <
+                        NoteCard note = { item }
+                        onPress = { handleNotePress }
+                        /> <
+                        /Animated.View>
+                    )
+                }
+                contentContainerStyle = {
+                    [styles.listContent, { paddingBottom: insets.bottom + THEME.spacing.xl }] }
+                numColumns = { isTablet ? 2 : 1 }
+                columnWrapperStyle = { isTablet ? styles.row : null }
                 />
-            )}
-        </ScreenContainer>
+            )
+        } <
+        /ScreenContainer>
     );
 };
 
+/* ========================================================================== */
+/*  Styles                                                                    */
+/* ========================================================================== */
 const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',

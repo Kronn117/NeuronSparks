@@ -1,6 +1,21 @@
 /**
+ * ============================================================================
  * Root Navigator
- * Main navigation structure for the app
+ * ============================================================================
+ *
+ * @file RootNavigator.js
+ * @description Defines the app's navigation tree using React Navigation's
+ * stack navigator.  Every screen is registered here with its route name
+ * (from `SCREEN_NAMES`), component, and header options.
+ *
+ * All screens use `headerShown: false` because each screen renders its own
+ * custom cyberpunk-themed header.
+ *
+ * Navigation flow:
+ *   Home → Create | Detail | Search | Settings | Archive
+ *
+ * @see src/utils/constants.js - SCREEN_NAMES
+ * @see src/utils/theme.js     - THEME.colors used in screenOptions
  */
 
 import React from 'react';
@@ -19,8 +34,14 @@ import SearchScreen from '@screens/SearchScreen';
 import SettingsScreen from '@screens/SettingsScreen';
 import ArchiveScreen from '@screens/ArchiveScreen';
 
+/** Stack navigator instance — screens are added via <Stack.Screen> below. */
 const Stack = createStackNavigator();
 
+/**
+ * Shared header styling applied to every screen in the stack.
+ * Note: all screens currently set `headerShown: false`, so these styles
+ * serve as defaults if a screen opts in to the native header.
+ */
 const screenOptions = {
     headerStyle: {
         backgroundColor: THEME.colors.bg_secondary,
@@ -38,73 +59,90 @@ const screenOptions = {
     },
 };
 
+/**
+ * RootNavigator component — wraps the stack in a NavigationContainer and
+ * configures the status-bar appearance.
+ *
+ * @returns {JSX.Element} The full navigation tree
+ */
 const RootNavigator = () => {
-    return (
-        <>
-            <StatusBar style="light" backgroundColor={THEME.colors.bg_dark} />
-            <NavigationContainer
-                onReady={() => {
-                    logger.log('Navigation ready');
-                }}
-                onStateChange={() => {
-                    logger.log('Navigation state changed');
-                }}
-            >
-                <Stack.Navigator
-                    screenOptions={screenOptions}
-                    initialRouteName={SCREEN_NAMES.HOME}
-                >
-                    <Stack.Screen
-                        name={SCREEN_NAMES.HOME}
-                        component={HomeScreen}
-                        options={{
-                            title: 'Neuro Sparks',
-                            headerShown: false,
-                        }}
-                    />
-                    <Stack.Screen
-                        name={SCREEN_NAMES.CREATE}
-                        component={CreateScreen}
-                        options={{
-                            title: 'New Note',
-                            headerShown: false,
-                            animationEnabled: true,
-                        }}
-                    />
-                    <Stack.Screen
-                        name={SCREEN_NAMES.DETAIL}
-                        component={DetailScreen}
-                        options={{
-                            headerShown: false,
-                        }}
-                    />
-                    <Stack.Screen
-                        name={SCREEN_NAMES.SEARCH}
-                        component={SearchScreen}
-                        options={{
-                            title: 'Search Notes',
-                            headerShown: false,
-                        }}
-                    />
-                    <Stack.Screen
-                        name={SCREEN_NAMES.SETTINGS}
-                        component={SettingsScreen}
-                        options={{
-                            title: 'Settings',
-                            headerShown: false,
-                        }}
-                    />
-                    <Stack.Screen
-                        name={SCREEN_NAMES.ARCHIVE}
-                        component={ArchiveScreen}
-                        options={{
-                            title: 'Archived Notes',
-                            headerShown: false,
-                        }}
-                    />
-                </Stack.Navigator>
-            </NavigationContainer>
-        </>
+    return ( <
+        >
+        <
+        StatusBar style = "light"
+        backgroundColor = { THEME.colors.bg_dark }
+        /> <
+        NavigationContainer onReady = {
+            () => {
+                logger.log('Navigation ready');
+            }
+        }
+        onStateChange = {
+            () => {
+                logger.log('Navigation state changed');
+            }
+        } >
+        <
+        Stack.Navigator screenOptions = { screenOptions }
+        initialRouteName = { SCREEN_NAMES.HOME } >
+        <
+        Stack.Screen name = { SCREEN_NAMES.HOME }
+        component = { HomeScreen }
+        options = {
+            {
+                title: 'Neuro Sparks',
+                headerShown: false,
+            }
+        }
+        /> <
+        Stack.Screen name = { SCREEN_NAMES.CREATE }
+        component = { CreateScreen }
+        options = {
+            {
+                title: 'New Note',
+                headerShown: false,
+                animationEnabled: true,
+            }
+        }
+        /> <
+        Stack.Screen name = { SCREEN_NAMES.DETAIL }
+        component = { DetailScreen }
+        options = {
+            {
+                headerShown: false,
+            }
+        }
+        /> <
+        Stack.Screen name = { SCREEN_NAMES.SEARCH }
+        component = { SearchScreen }
+        options = {
+            {
+                title: 'Search Notes',
+                headerShown: false,
+            }
+        }
+        /> <
+        Stack.Screen name = { SCREEN_NAMES.SETTINGS }
+        component = { SettingsScreen }
+        options = {
+            {
+                title: 'Settings',
+                headerShown: false,
+            }
+        }
+        /> <
+        Stack.Screen name = { SCREEN_NAMES.ARCHIVE }
+        component = { ArchiveScreen }
+        options = {
+            {
+                title: 'Archived Notes',
+                headerShown: false,
+            }
+        }
+        /> <
+        /Stack.Navigator> <
+        /NavigationContainer> <
+        />
     );
 };
 

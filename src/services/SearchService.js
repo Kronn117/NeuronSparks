@@ -1,17 +1,40 @@
 /**
+ * ============================================================================
  * Search Service
- * Handles search, filtering, and indexing
+ * ============================================================================
+ *
+ * @file SearchService.js
+ * @description Pure-function search engine that operates on an array of notes.
+ * Features:
+ *   - Full-text search across title, content, and tags.
+ *   - Relevance scoring (title match > content match > tag match > pin bonus).
+ *   - Tag-based filtering in OR ("any") or AND ("all") mode.
+ *   - Date-range filtering.
+ *   - Autocomplete suggestions from titles and tags.
+ *   - Advanced multi-criteria search.
+ *   - Aggregate statistics (word count, tag count, colour distribution).
+ *
+ * @see src/utils/constants.js - SEARCH_CONFIG (MIN_QUERY_LENGTH, MAX_RESULTS)
  */
 
 import { logger } from '@utils/logger';
 import { SEARCH_CONFIG } from '@utils/constants';
 
 /**
- * Calculate relevance score for search results
- * Higher score = better match
- * @param {object} note - Note to score
+ * Calculate a relevance score (0–100) for ranking search results.
+ * Higher score = better match.
+ *
+ * Scoring table:
+ *   - Exact title match       : 40 pts
+ *   - Title starts with query : 30 pts
+ *   - Title contains query    : 20 pts
+ *   - Content contains query  : 10 pts
+ *   - Tag match               : 15 pts
+ *   - Pinned bonus            :  5 pts
+ *
+ * @param {object} note  - Note to score
  * @param {string} query - Search query
- * @returns {number} Relevance score (0-100)
+ * @returns {number} Relevance score
  */
 const calculateRelevanceScore = (note, query) => {
     if (!query) return 0;
@@ -52,9 +75,7 @@ const calculateRelevanceScore = (note, query) => {
     return score;
 };
 
-/**
- * SearchService - Search and filtering operations
- */
+/** SearchService singleton — all methods are synchronous and pure. */
 export const SearchService = {
     /**
      * Search notes by query

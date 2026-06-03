@@ -1,14 +1,23 @@
 /**
+ * ============================================================================
  * Validation Service
- * Centralized validation for notes and related data
+ * ============================================================================
+ *
+ * @file ValidationService.js
+ * @description Centralised validation layer for notes and their fields.
+ * Delegates to the low-level validators in `src/utils/validators.js` and
+ * adds batch validation, data sanitisation, and normalisation helpers.
+ *
+ * Every note that enters the system should be sanitised and normalised
+ * through this service before being persisted.
+ *
+ * @see src/utils/validators.js - validateNote, validateTitle, etc.
  */
 
 import { logger } from '@utils/logger';
 import { validateNote, validateTitle, validateContent, validateTags } from '@utils/validators';
 
-/**
- * ValidationService - High-level validation operations
- */
+/** ValidationService singleton — all methods are synchronous. */
 export const ValidationService = {
     /**
      * Validate a complete note object
@@ -133,8 +142,7 @@ export const ValidationService = {
                 title: (note.title || '').trim().slice(0, 200),
                 content: (note.content || '').trim().slice(0, 50000),
                 tags: Array.isArray(note.tags) ?
-                    note.tags.map(tag => String(tag).trim().slice(0, 50)).filter(tag => tag.length > 0) :
-                    [],
+                    note.tags.map(tag => String(tag).trim().slice(0, 50)).filter(tag => tag.length > 0) : [],
             };
         } catch (error) {
             logger.error('❌ Sanitization error:', error);

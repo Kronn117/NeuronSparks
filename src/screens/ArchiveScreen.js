@@ -1,5 +1,16 @@
 /**
+ * ============================================================================
  * Archive Screen
+ * ============================================================================
+ *
+ * @file ArchiveScreen.js
+ * @description Displays all archived notes in a responsive FlatList.
+ * Users can tap a note to view/edit it (DetailScreen), un-archive it, or
+ * permanently delete it.  Uses the same dynamic-key pattern as HomeScreen
+ * for responsive 1/2 column layouts.
+ *
+ * @see NoteContext.getArchivedNotes, deleteNote, toggleArchive
+ * @see NoteCard, EmptyState, ScreenContainer
  */
 
 import React, {
@@ -47,6 +58,11 @@ import {
     logger
 } from '@utils/logger';
 
+/**
+ * ArchiveScreen component — list of archived notes with delete/un-archive.
+ *
+ * @returns {JSX.Element}
+ */
 const ArchiveScreen = () => {
     const navigation = useNavigation();
     const {
@@ -73,13 +89,15 @@ const ArchiveScreen = () => {
         startFadeIn();
     }, [startFadeIn]);
 
+    /** Navigate to DetailScreen for the tapped note. */
     const handleNotePress = useCallback((note) => {
         navigation.navigate('Detail', {
             note
         });
     }, [navigation]);
 
-    const handleDelete = useCallback(async (noteId) => {
+    /** Permanently delete a note from the archive. */
+    const handleDelete = useCallback(async(noteId) => {
         try {
             await deleteNote(noteId);
             logger.log('Note deleted from archive');
@@ -88,53 +106,74 @@ const ArchiveScreen = () => {
         }
     }, [deleteNote]);
 
-    return (
-        <ScreenContainer>
-            <Animated.View style={[styles.header, fadeInStyle, {
+    return ( <
+        ScreenContainer >
+        <
+        Animated.View style = {
+            [styles.header, fadeInStyle, {
                 backgroundColor: colors.bg_dark,
                 borderBottomColor: colors.border_medium
-            }]}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <MaterialCommunityIcons name="arrow-left" size={24} color={colors.text_primary} />
-                </TouchableOpacity>
-                <Text style={[styles.headerTitle, {
-                    fontSize: responsiveFontSize,
-                    color: colors.text_primary
-                }]}>Archived Notes</Text>
-            </Animated.View>
+            }]
+        } >
+        <
+        TouchableOpacity onPress = {
+            () => navigation.goBack() }
+        style = { styles.backButton } >
+        <
+        MaterialCommunityIcons name = "arrow-left"
+        size = { 24 }
+        color = { colors.text_primary }
+        /> <
+        /TouchableOpacity> <
+        Text style = {
+            [styles.headerTitle, {
+                fontSize: responsiveFontSize,
+                color: colors.text_primary
+            }]
+        } > Archived Notes < /Text> <
+        /Animated.View>
 
-            {archivedNotes.length === 0 ? (
-                <Animated.View entering={FadeInDown.delay(100).springify()}>
-                    <EmptyState
-                        icon="inbox"
-                        title="Archive Empty"
-                        description="Archived notes will appear here"
-                    />
-                </Animated.View>
-            ) : (
-                <FlatList
-                    data={archivedNotes}
-                    keyExtractor={(item) => item.id}
-                    key={isTablet ? 'grid' : 'list'}
-                    renderItem={({ item, index }) => (
-                        <Animated.View entering={FadeInDown.delay(index * 50).springify()}>
-                            <NoteCard
-                                note={item}
-                                onPress={handleNotePress}
-                                onDelete={handleDelete}
-                                onToggleArchive={toggleArchive}
-                            />
-                        </Animated.View>
-                    )}
-                    contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + THEME.spacing.xl }]}
-                    numColumns={isTablet ? 2 : 1}
-                    columnWrapperStyle={isTablet ? styles.row : null}
+        {
+            archivedNotes.length === 0 ? ( <
+                Animated.View entering = { FadeInDown.delay(100).springify() } >
+                <
+                EmptyState icon = "inbox"
+                title = "Archive Empty"
+                description = "Archived notes will appear here" /
+                >
+                <
+                /Animated.View>
+            ) : ( <
+                FlatList data = { archivedNotes }
+                keyExtractor = {
+                    (item) => item.id }
+                key = { isTablet ? 'grid' : 'list' }
+                renderItem = {
+                    ({ item, index }) => ( <
+                        Animated.View entering = { FadeInDown.delay(index * 50).springify() } >
+                        <
+                        NoteCard note = { item }
+                        onPress = { handleNotePress }
+                        onDelete = { handleDelete }
+                        onToggleArchive = { toggleArchive }
+                        /> <
+                        /Animated.View>
+                    )
+                }
+                contentContainerStyle = {
+                    [styles.listContent, { paddingBottom: insets.bottom + THEME.spacing.xl }] }
+                numColumns = { isTablet ? 2 : 1 }
+                columnWrapperStyle = { isTablet ? styles.row : null }
                 />
-            )}
-        </ScreenContainer>
+            )
+        } <
+        /ScreenContainer>
     );
 };
 
+/* ========================================================================== */
+/*  Styles                                                                    */
+/* ========================================================================== */
 const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',

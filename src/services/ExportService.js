@@ -1,15 +1,23 @@
 /**
+ * ============================================================================
  * Export Service
- * Handles export operations to different formats
+ * ============================================================================
+ *
+ * @file ExportService.js
+ * @description Handles note export to multiple file formats (JSON, CSV,
+ * Markdown) and full-data backup creation.  Each export method accepts an
+ * array of notes and returns a string suitable for writing to a file or
+ * sharing via the system share sheet.
+ *
+ * @see StorageService          - Used by createFullBackup
+ * @see src/utils/helpers.js    - formatDate
  */
 
 import { logger } from '@utils/logger';
 import { formatDate } from '@utils/helpers';
 import { StorageService } from './StorageService';
 
-/**
- * ExportService - Export operations
- */
+/** ExportService singleton — all export methods are pure (no side-effects). */
 export const ExportService = {
         /**
          * Export notes to JSON format
@@ -90,77 +98,77 @@ export const ExportService = {
 
                                 if (note.tags && note.tags.length > 0) {
                                     markdown += `**Tags:** ${note.tags.map(tag => `\`${tag}\``).join(', ')}\n`;
-        }
+                    }
 
-        markdown += '\n';
-        markdown += note.content || '*No content*';
-        markdown += '\n\n---\n\n';
-      });
+                    markdown += '\n';
+                    markdown += note.content || '*No content*';
+                    markdown += '\n\n---\n\n';
+                });
 
-      return markdown;
-    } catch (error) {
-      logger.error('❌ Markdown export error:', error);
-      throw error;
-    }
-  },
+                return markdown;
+            } catch (error) {
+                logger.error('❌ Markdown export error:', error);
+                throw error;
+            }
+        },
 
-  /**
-   * Export notes to PDF format
-   * Note: Placeholder for future implementation with a PDF library
-   * @param {Array} notes - Notes to export
-   * @returns {Promise} PDF export result
-   */
-  exportToPDF: async notes => {
-    try {
-      logger.log(`📤 Exporting ${notes.length} notes to PDF (not yet implemented)`);
-      // TODO: Implement with react-native-pdf or similar
-      throw new Error('PDF export not yet implemented');
-    } catch (error) {
-      logger.error('❌ PDF export error:', error);
-      throw error;
-    }
-  },
+        /**
+         * Export notes to PDF format
+         * Note: Placeholder for future implementation with a PDF library
+         * @param {Array} notes - Notes to export
+         * @returns {Promise} PDF export result
+         */
+        exportToPDF: async notes => {
+            try {
+                logger.log(`📤 Exporting ${notes.length} notes to PDF (not yet implemented)`);
+                // TODO: Implement with react-native-pdf or similar
+                throw new Error('PDF export not yet implemented');
+            } catch (error) {
+                logger.error('❌ PDF export error:', error);
+                throw error;
+            }
+        },
 
-  /**
-   * Export all notes and settings as backup
-   * @returns {Promise<string>} Backup JSON string
-   */
-  createFullBackup: async () => {
-    try {
-      logger.log('📦 Creating full backup');
+        /**
+         * Export all notes and settings as backup
+         * @returns {Promise<string>} Backup JSON string
+         */
+        createFullBackup: async () => {
+            try {
+                logger.log('📦 Creating full backup');
 
-      const notes = await StorageService.getAllNotes();
-      const settings = await StorageService.getSettings();
+                const notes = await StorageService.getAllNotes();
+                const settings = await StorageService.getSettings();
 
-      const backup = {
-        version: '1.0.0',
-        backupDate: new Date().toISOString(),
-        dataVersion: '1.0.0',
-        notes,
-        settings,
-      };
+                const backup = {
+                    version: '1.0.0',
+                    backupDate: new Date().toISOString(),
+                    dataVersion: '1.0.0',
+                    notes,
+                    settings,
+                };
 
-      return JSON.stringify(backup, null, 2);
-    } catch (error) {
-      logger.error('❌ Full backup error:', error);
-      throw error;
-    }
-  },
+                return JSON.stringify(backup, null, 2);
+            } catch (error) {
+                logger.error('❌ Full backup error:', error);
+                throw error;
+            }
+        },
 
-  /**
-   * Get export filename with timestamp
-   * @param {string} format - Export format ('json', 'csv', 'md')
-   * @returns {string} Filename
-   */
-  getExportFilename: format => {
-    const timestamp = new Date().toISOString().split('T')[0];
-    const formatExt = {
-      json: 'json',
-      csv: 'csv',
-      markdown: 'md',
-      md: 'md',
-    };
+        /**
+         * Get export filename with timestamp
+         * @param {string} format - Export format ('json', 'csv', 'md')
+         * @returns {string} Filename
+         */
+        getExportFilename: format => {
+            const timestamp = new Date().toISOString().split('T')[0];
+            const formatExt = {
+                json: 'json',
+                csv: 'csv',
+                markdown: 'md',
+                md: 'md',
+            };
 
-    return `neuro-sparks-${timestamp}.${formatExt[format] || 'txt'}`;
-  },
+            return `neuro-sparks-${timestamp}.${formatExt[format] || 'txt'}`;
+        },
 };

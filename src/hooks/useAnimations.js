@@ -1,6 +1,26 @@
 /**
- * useAnimations Hook
- * Provides common animation utilities for Tony Stark-style interactions
+ * ============================================================================
+ * Animation Hooks
+ * ============================================================================
+ *
+ * @file useAnimations.js
+ * @description A collection of reusable React Native Reanimated hooks that
+ * power the cyberpunk / Tony-Stark-style motion design throughout the app.
+ * Each exported hook returns an `animatedStyle` (to spread on an
+ * `<Animated.View>`) and a trigger function to start the animation.
+ *
+ * All `'worklet'` callbacks run on the UI thread for 60 fps performance.
+ *
+ * Hooks provided:
+ *   - usePressAnimation   — scale-down press feedback
+ *   - useFadeIn           — opacity + slide-up entrance
+ *   - usePulseGlow        — infinite pulsing glow (arc-reactor style)
+ *   - useSlideIn          — directional slide entrance
+ *   - useHolographicShimmer — repeating horizontal shimmer
+ *   - useFloating         — gentle infinite float (up/down)
+ *   - useRotation         — infinite 360° spin (loading indicators)
+ *
+ * @see src/utils/theme.js - THEME.animationSpring, THEME.animationDuration
  */
 
 import { useCallback } from 'react';
@@ -17,8 +37,10 @@ import {
 import { THEME } from '@utils/theme';
 
 /**
- * Scale animation on press
- * Creates a satisfying press effect like Tony Stark's UI
+ * Scale animation on press — gives tactile feedback like a Stark HUD button.
+ * Uses `withSpring` for natural bounce on release.
+ *
+ * @returns {{ animatedStyle: object, onPressIn: () => void, onPressOut: () => void }}
  */
 export const usePressAnimation = () => {
     const scale = useSharedValue(1);
@@ -41,8 +63,10 @@ export const usePressAnimation = () => {
 };
 
 /**
- * Fade in animation
- * Smooth entrance animation for screens
+ * Fade-in entrance animation — opacity 0→1 combined with a 20 px upward slide.
+ *
+ * @param {number} delay - Optional delay in ms before the animation starts
+ * @returns {{ animatedStyle: object, startAnimation: () => void }}
  */
 export const useFadeIn = (delay = 0) => {
     const opacity = useSharedValue(0);
@@ -66,8 +90,10 @@ export const useFadeIn = (delay = 0) => {
 };
 
 /**
- * Pulsing glow effect
- * Creates an arc reactor-style pulsing animation
+ * Pulsing glow effect — infinite scale + opacity cycle reminiscent of an
+ * arc reactor.  Call `startPulse` once in a useEffect to begin.
+ *
+ * @returns {{ animatedStyle: object, startPulse: () => void }}
  */
 export const usePulseGlow = () => {
     const scale = useSharedValue(1);
@@ -96,8 +122,11 @@ export const usePulseGlow = () => {
 };
 
 /**
- * Slide in animation
- * Smooth slide from different directions
+ * Directional slide-in entrance animation.
+ *
+ * @param {'left'|'right'|'up'|'down'} direction - Entry direction (default 'right')
+ * @param {number} delay - Optional delay in ms
+ * @returns {{ animatedStyle: object, startAnimation: () => void }}
  */
 export const useSlideIn = (direction = 'right', delay = 0) => {
     const translateX = useSharedValue(0);
@@ -115,7 +144,7 @@ export const useSlideIn = (direction = 'right', delay = 0) => {
     const startAnimation = useCallback(() => {
         'worklet';
         const offset = 50;
-        
+
         if (direction === 'left') translateX.value = -offset;
         if (direction === 'right') translateX.value = offset;
         if (direction === 'up') translateY.value = -offset;
@@ -137,8 +166,10 @@ export const useSlideIn = (direction = 'right', delay = 0) => {
 };
 
 /**
- * Holographic shimmer effect
- * Creates a futuristic holographic scanning effect
+ * Holographic shimmer — a repeating horizontal translate that creates a
+ * futuristic scanning / shimmer overlay effect.
+ *
+ * @returns {{ animatedStyle: object, startShimmer: () => void }}
  */
 export const useHolographicShimmer = () => {
     const shimmer = useSharedValue(-1);
@@ -150,8 +181,7 @@ export const useHolographicShimmer = () => {
     const startShimmer = useCallback(() => {
         'worklet';
         shimmer.value = withRepeat(
-            withTiming(1, { duration: 2000, easing: Easing.linear }),
-            -1,
+            withTiming(1, { duration: 2000, easing: Easing.linear }), -1,
             false
         );
     }, []);
@@ -160,8 +190,10 @@ export const useHolographicShimmer = () => {
 };
 
 /**
- * Floating animation
- * Gentle floating effect for important elements
+ * Floating animation — gentle infinite vertical oscillation for
+ * high-priority UI elements (e.g. FABs, badges).
+ *
+ * @returns {{ animatedStyle: object, startFloating: () => void }}
  */
 export const useFloating = () => {
     const translateY = useSharedValue(0);
@@ -184,8 +216,9 @@ export const useFloating = () => {
 };
 
 /**
- * Rotation animation
- * Smooth rotation for loading indicators
+ * Continuous rotation — useful for loading spinners and progress indicators.
+ *
+ * @returns {{ animatedStyle: object, startRotation: () => void, stopRotation: () => void }}
  */
 export const useRotation = () => {
     const rotation = useSharedValue(0);
@@ -197,8 +230,7 @@ export const useRotation = () => {
     const startRotation = useCallback(() => {
         'worklet';
         rotation.value = withRepeat(
-            withTiming(360, { duration: 1000, easing: Easing.linear }),
-            -1,
+            withTiming(360, { duration: 1000, easing: Easing.linear }), -1,
             false
         );
     }, []);

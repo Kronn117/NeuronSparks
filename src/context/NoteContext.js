@@ -1,7 +1,27 @@
 /**
+ * ============================================================================
  * Note Context & Provider
- * Manages global note state with useReducer
- * RULE: All note state changes must go through this context
+ * ============================================================================
+ *
+ * @file NoteContext.js
+ * @description The single source of truth for all note data in the application.
+ *              Uses useReducer for predictable state transitions and exposes CRUD
+ *              operations (add, update, delete, pin, archive, restore) plus
+ *              selector helpers (getPinnedNotes, getArchivedNotes, getStatistics).
+ *
+ * State Flow:
+ *   1. On mount, loadNotes() reads from AsyncStorage via StorageService
+ *   2. Every mutation validates via ValidationService, persists via StorageService,
+ *      then dispatches a reducer action to update React state
+ *   3. AnalyticsService tracks create/update/delete/pin/archive events
+ *
+ * RULE: All note state changes MUST go through this context - never call
+ *       StorageService directly from screens or components.
+ *
+ * @module context/NoteContext
+ * @see StorageService   for the persistence layer
+ * @see ValidationService for sanitise/normalise logic
+ * @see AnalyticsService for event tracking
  */
 
 import React, { createContext, useReducer, useEffect, useCallback } from 'react';
@@ -475,5 +495,5 @@ export const NoteContextProvider = ({ children }) => {
         getStatistics,
     };
 
-    return <NoteContext.Provider value={value}>{children}</NoteContext.Provider>;
+    return <NoteContext.Provider value = { value } > { children } < /NoteContext.Provider>;
 };

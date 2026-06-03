@@ -1,6 +1,23 @@
 ﻿/**
+ * ============================================================================
  * NoteCard Component
- * Displays a single note with Tony Stark-style holographic effects
+ * ============================================================================
+ *
+ * @file NoteCard.js
+ * @description Displays a single note as an interactive card with a holographic
+ *              sci-fi colour indicator strip, title, timestamp, content preview,
+ *              tag pills, and inline action buttons (pin / archive / delete).
+ *
+ * Used by HomeScreen, SearchScreen, and ArchiveScreen inside FlatList renderers.
+ *
+ * @props {object}   note            - The note data object (id, title, content, etc.)
+ * @props {function} onPress         - Callback when the card body is tapped
+ * @props {function} [onDelete]      - Callback to delete this note (shows confirmation dialog)
+ * @props {function} [onTogglePin]   - Callback to toggle the pinned state
+ * @props {function} [onToggleArchive] - Callback to toggle the archived state
+ *
+ * @see usePressAnimation for the press-scale effect
+ * @see THEME.colors.note_* for the colour indicator palette
  */
 
 import React, { useCallback } from 'react';
@@ -19,106 +36,120 @@ const NoteCard = ({ note, onPress, onDelete, onTogglePin, onToggleArchive }) => 
             { text: 'Cancel', onPress: () => null },
             {
                 text: 'Delete',
-                onPress: () => onDelete?.(note.id),
+                onPress: () => onDelete ? .(note.id),
                 style: 'destructive',
             },
         ]);
     }, [note.id, onDelete]);
 
-    return (
-        <Animated.View style={[styles.container, animatedStyle]}>
-            <TouchableOpacity
-                style={styles.touchable}
-                onPress={() => onPress?.(note)}
-                onPressIn={onPressIn}
-                onPressOut={onPressOut}
-                activeOpacity={1}
-            >
-                <View
-                    style={[
-                        styles.colorIndicator,
-                        styles.colorIndicatorGlow,
-                        { 
-                            backgroundColor: note.color || THEME.colors.note_blue,
-                            shadowColor: note.color || THEME.colors.note_blue,
-                        },
-                    ]}
+    return ( <
+        Animated.View style = {
+            [styles.container, animatedStyle] } >
+        <
+        TouchableOpacity style = { styles.touchable }
+        onPress = {
+            () => onPress ? .(note) }
+        onPressIn = { onPressIn }
+        onPressOut = { onPressOut }
+        activeOpacity = { 1 } >
+        <
+        View style = {
+            [
+                styles.colorIndicator,
+                styles.colorIndicatorGlow,
+                {
+                    backgroundColor: note.color || THEME.colors.note_blue,
+                    shadowColor: note.color || THEME.colors.note_blue,
+                },
+            ]
+        }
+        /> <
+        View style = { styles.content } >
+        <
+        View style = { styles.header } >
+        <
+        Text style = { styles.title }
+        numberOfLines = { 1 } > { note.title } <
+        /Text> {
+            note.isPinned ? ( <
+                MaterialCommunityIcons name = "pin"
+                size = { 16 }
+                color = { THEME.colors.primary }
                 />
-                <View style={styles.content}>
-                    <View style={styles.header}>
-                        <Text style={styles.title} numberOfLines={1}>
-                            {note.title}
-                        </Text>
-                        {note.isPinned ? (
-                            <MaterialCommunityIcons
-                                name="pin"
-                                size={16}
-                                color={THEME.colors.primary}
-                            />
-                        ) : null}
-                    </View>
+            ) : null
+        } <
+        /View>
 
-                    <Text style={styles.timestamp}>{getTimeAgo(note.updatedAt)}</Text>
+        <
+        Text style = { styles.timestamp } > { getTimeAgo(note.updatedAt) } < /Text>
 
-                    {note.content ? (
-                        <Text style={styles.preview} numberOfLines={2}>
-                            {truncateText(note.content, 80)}
-                        </Text>
-                    ) : null}
+        {
+            note.content ? ( <
+                Text style = { styles.preview }
+                numberOfLines = { 2 } > { truncateText(note.content, 80) } <
+                /Text>
+            ) : null
+        }
 
-                    {note.tags?.length > 0 ? (
-                        <View style={styles.tagsContainer}>
-                            {note.tags.slice(0, 3).map(tag => (
-                                <Text key={tag} style={styles.tag}>
-                                    #{tag}
-                                </Text>
-                            ))}
-                            {note.tags.length > 3 ? (
-                                <Text style={styles.moreTag}>+{note.tags.length - 3}</Text>
-                            ) : null}
-                        </View>
-                    ) : null}
+        {
+            note.tags ? .length > 0 ? ( <
+                View style = { styles.tagsContainer } > {
+                    note.tags.slice(0, 3).map(tag => ( <
+                        Text key = { tag }
+                        style = { styles.tag } > #{ tag } <
+                        /Text>
+                    ))
+                } {
+                    note.tags.length > 3 ? ( <
+                        Text style = { styles.moreTag } > +{ note.tags.length - 3 } < /Text>
+                    ) : null
+                } <
+                /View>
+            ) : null
+        }
 
-                    <View style={styles.actions}>
-                        <TouchableOpacity
-                            style={styles.actionButton}
-                            onPress={() => onTogglePin?.(note.id)}
-                            hitSlop={10}
-                        >
-                            <MaterialCommunityIcons
-                                name={note.isPinned ? 'pin' : 'pin-outline'}
-                                size={20}
-                                color={
-                                    note.isPinned
-                                        ? THEME.colors.primary
-                                        : THEME.colors.text_secondary
-                                }
-                            />
-                        </TouchableOpacity>
-                        {onToggleArchive ? (
-                            <TouchableOpacity
-                                style={styles.actionButton}
-                                onPress={() => onToggleArchive?.(note.id)}
-                                hitSlop={10}
-                            >
-                                <MaterialCommunityIcons
-                                    name={note.isArchived ? 'archive-arrow-up-outline' : 'archive-outline'}
-                                    size={20}
-                                    color={THEME.colors.text_secondary}
-                                />
-                            </TouchableOpacity>
-                        ) : null}
-                        <TouchableOpacity onPress={handleDelete} hitSlop={10}>
-                            <MaterialCommunityIcons
-                                name="delete-outline"
-                                size={20}
-                                color={THEME.colors.text_secondary}
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </TouchableOpacity>
-        </Animated.View>
+        <
+        View style = { styles.actions } >
+        <
+        TouchableOpacity style = { styles.actionButton }
+        onPress = {
+            () => onTogglePin ? .(note.id) }
+        hitSlop = { 10 } >
+        <
+        MaterialCommunityIcons name = { note.isPinned ? 'pin' : 'pin-outline' }
+        size = { 20 }
+        color = {
+            note.isPinned ?
+            THEME.colors.primary :
+                THEME.colors.text_secondary
+        }
+        /> <
+        /TouchableOpacity> {
+            onToggleArchive ? ( <
+                TouchableOpacity style = { styles.actionButton }
+                onPress = {
+                    () => onToggleArchive ? .(note.id) }
+                hitSlop = { 10 } >
+                <
+                MaterialCommunityIcons name = { note.isArchived ? 'archive-arrow-up-outline' : 'archive-outline' }
+                size = { 20 }
+                color = { THEME.colors.text_secondary }
+                /> <
+                /TouchableOpacity>
+            ) : null
+        } <
+        TouchableOpacity onPress = { handleDelete }
+        hitSlop = { 10 } >
+        <
+        MaterialCommunityIcons name = "delete-outline"
+        size = { 20 }
+        color = { THEME.colors.text_secondary }
+        /> <
+        /TouchableOpacity> <
+        /View> <
+        /View> <
+        /TouchableOpacity> <
+        /Animated.View>
     );
 };
 

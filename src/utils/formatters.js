@@ -1,6 +1,13 @@
 /**
+ * ============================================================================
  * Text Formatting Utilities
- * Functions for rich text formatting, markdown support, etc.
+ * ============================================================================
+ *
+ * @file formatters.js
+ * @description Rich-text and Markdown formatting helpers: bold, italic,
+ * strikethrough, headings, bullet/numbered lists, code blocks, links,
+ * and word-count estimation.  Used primarily by the export and detail
+ * screens to render note content.
  */
 
 /**

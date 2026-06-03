@@ -1,9 +1,0 @@
-modules = ["nodejs-24"]
-run = "npm run web -- --port 8081 --host 0.0.0.0"
-
-[workflows]
-runButton = "Project"
-
-[[ports]]
-localPort = 8081
-externalPort = 8081

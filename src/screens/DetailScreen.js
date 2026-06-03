@@ -1,5 +1,21 @@
 /**
+ * ============================================================================
  * Detail Screen
+ * ============================================================================
+ *
+ * @file DetailScreen.js
+ * @description Read / edit view for a single note.  Receives the note object
+ * via route params.  Supports:
+ *   - View mode: displays title, timestamp, content, and tags.
+ *   - Edit mode:  inline editing of title, content, colour, and tags.
+ *   - Toolbar actions: toggle pin, toggle archive, delete (with confirmation).
+ *
+ * State is re-synced from route params each time the screen gains focus
+ * (via `useFocusEffect`) so external changes (e.g. from HomeScreen) are
+ * reflected immediately.
+ *
+ * @see NoteContext.updateNote, deleteNote, togglePin, toggleArchive
+ * @see src/utils/helpers.js - getTimeAgo
  */
 
 import React, {
@@ -53,6 +69,11 @@ import {
     logger
 } from '@utils/logger';
 
+/**
+ * DetailScreen component — view and edit a single note.
+ *
+ * @returns {JSX.Element}
+ */
 const DetailScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
@@ -87,6 +108,7 @@ const DetailScreen = () => {
         startFadeIn();
     }, [startFadeIn]);
 
+    /** Re-sync local state from route params whenever the screen is focused. */
     useFocusEffect(
         useCallback(() => {
             if (initialNote) {
@@ -99,6 +121,7 @@ const DetailScreen = () => {
         }, [initialNote]),
     );
 
+    /** Toggle a tag on/off; enforces a maximum of 5 tags per note. */
     const toggleTag = useCallback((tagId) => {
         const tag = DEFAULT_TAGS.find(t => t.id === tagId);
         if (!tag) return;
@@ -115,7 +138,8 @@ const DetailScreen = () => {
         });
     }, []);
 
-    const handleSave = useCallback(async () => {
+    /** Persist edits via NoteContext and exit edit mode on success. */
+    const handleSave = useCallback(async() => {
         if (!title.trim()) {
             Alert.alert('Error', 'Please enter a title');
             return;
@@ -139,6 +163,7 @@ const DetailScreen = () => {
         }
     }, [title, content, selectedTags, selectedColor, note.id, updateNote]);
 
+    /** Show a confirmation dialog, then delete the note and navigate back. */
     const handleDelete = useCallback(() => {
         Alert.alert('Delete Note', 'Are you sure you want to delete this note?', [{
                 text: 'Cancel',
@@ -147,7 +172,7 @@ const DetailScreen = () => {
             {
                 text: 'Delete',
                 style: 'destructive',
-                onPress: async () => {
+                onPress: async() => {
                     try {
                         await deleteNote(note.id);
                         navigation.goBack();
@@ -160,7 +185,8 @@ const DetailScreen = () => {
         ]);
     }, [note.id, deleteNote, navigation]);
 
-    const handleTogglePin = useCallback(async () => {
+    /** Toggle the pinned state (optimistic local update). */
+    const handleTogglePin = useCallback(async() => {
         try {
             await togglePin(note.id);
             setNote(prev => ({
@@ -172,7 +198,8 @@ const DetailScreen = () => {
         }
     }, [note.id, togglePin]);
 
-    const handleToggleArchive = useCallback(async () => {
+    /** Toggle the archived state (optimistic local update). */
+    const handleToggleArchive = useCallback(async() => {
         try {
             await toggleArchive(note.id);
             setNote(prev => ({
@@ -184,169 +211,238 @@ const DetailScreen = () => {
         }
     }, [note.id, toggleArchive]);
 
+    /** Guard — show an error state if the note was deleted externally. */
     if (!note.id) {
-        return (
-            <ScreenContainer>
-                <View style={styles.errorContainer}>
-                    <MaterialCommunityIcons name="alert-circle-outline" size={48} color={THEME.colors.text_tertiary} />
-                    <Text style={styles.errorText}>Note not found</Text>
-                </View>
-            </ScreenContainer>
+        return ( <
+            ScreenContainer >
+            <
+            View style = { styles.errorContainer } >
+            <
+            MaterialCommunityIcons name = "alert-circle-outline"
+            size = { 48 }
+            color = { THEME.colors.text_tertiary }
+            /> <
+            Text style = { styles.errorText } > Note not found < /Text> <
+            /View> <
+            /ScreenContainer>
         );
     }
 
     const noteTags = note.tags || [];
 
-    return (
-        <ScreenContainer>
-            <Animated.View style={[styles.header, fadeInStyle, {
+    return ( <
+        ScreenContainer >
+        <
+        Animated.View style = {
+            [styles.header, fadeInStyle, {
                 backgroundColor: colors.bg_dark,
                 borderBottomColor: colors.border_medium
-            }]}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <MaterialCommunityIcons name="arrow-left" size={24} color={colors.text_primary} />
-                </TouchableOpacity>
-                <View style={styles.headerActions}>
-                    {isEditing ? (
-                        <TouchableOpacity onPress={handleSave} style={styles.actionButton} disabled={loading}>
-                            <MaterialCommunityIcons
-                                name="check"
-                                size={24}
-                                color={loading ? colors.text_tertiary : colors.primary}
-                            />
-                        </TouchableOpacity>
-                    ) : (
-                        <TouchableOpacity onPress={() => setIsEditing(true)} style={styles.actionButton}>
-                            <MaterialCommunityIcons name="pencil" size={24} color={colors.text_primary} />
-                        </TouchableOpacity>
-                    )}
-                    <TouchableOpacity onPress={handleTogglePin} style={styles.actionButton}>
-                        <MaterialCommunityIcons
-                            name={note.isPinned ? 'pin' : 'pin-outline'}
-                            size={24}
-                            color={note.isPinned ? colors.primary : colors.text_primary}
-                        />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleToggleArchive} style={styles.actionButton}>
-                        <MaterialCommunityIcons
-                            name={note.isArchived ? 'archive-arrow-up-outline' : 'archive-outline'}
-                            size={24}
-                            color={colors.text_primary}
-                        />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleDelete} style={styles.actionButton}>
-                        <MaterialCommunityIcons name="delete-outline" size={24} color={colors.text_primary} />
-                    </TouchableOpacity>
-                </View>
-            </Animated.View>
+            }]
+        } >
+        <
+        TouchableOpacity onPress = {
+            () => navigation.goBack() }
+        style = { styles.backButton } >
+        <
+        MaterialCommunityIcons name = "arrow-left"
+        size = { 24 }
+        color = { colors.text_primary }
+        /> <
+        /TouchableOpacity> <
+        View style = { styles.headerActions } > {
+            isEditing ? ( <
+                TouchableOpacity onPress = { handleSave }
+                style = { styles.actionButton }
+                disabled = { loading } >
+                <
+                MaterialCommunityIcons name = "check"
+                size = { 24 }
+                color = { loading ? colors.text_tertiary : colors.primary }
+                /> <
+                /TouchableOpacity>
+            ) : ( <
+                TouchableOpacity onPress = {
+                    () => setIsEditing(true) }
+                style = { styles.actionButton } >
+                <
+                MaterialCommunityIcons name = "pencil"
+                size = { 24 }
+                color = { colors.text_primary }
+                /> <
+                /TouchableOpacity>
+            )
+        } <
+        TouchableOpacity onPress = { handleTogglePin }
+        style = { styles.actionButton } >
+        <
+        MaterialCommunityIcons name = { note.isPinned ? 'pin' : 'pin-outline' }
+        size = { 24 }
+        color = { note.isPinned ? colors.primary : colors.text_primary }
+        /> <
+        /TouchableOpacity> <
+        TouchableOpacity onPress = { handleToggleArchive }
+        style = { styles.actionButton } >
+        <
+        MaterialCommunityIcons name = { note.isArchived ? 'archive-arrow-up-outline' : 'archive-outline' }
+        size = { 24 }
+        color = { colors.text_primary }
+        /> <
+        /TouchableOpacity> <
+        TouchableOpacity onPress = { handleDelete }
+        style = { styles.actionButton } >
+        <
+        MaterialCommunityIcons name = "delete-outline"
+        size = { 24 }
+        color = { colors.text_primary }
+        /> <
+        /TouchableOpacity> <
+        /View> <
+        /Animated.View>
 
-            <Animated.ScrollView
-                style={[styles.content, { backgroundColor: colors.bg_dark }]}
-                keyboardShouldPersistTaps="handled"
-            >
-                {isEditing ? (
-                    <>
-                        <Animated.View entering={FadeInDown.delay(100).springify()}>
-                            <TextInput
-                                style={[styles.titleInput, { color: colors.text_primary }]}
-                                placeholder="Note title..."
-                                placeholderTextColor={colors.text_tertiary}
-                                value={title}
-                                onChangeText={setTitle}
-                            />
-                        </Animated.View>
-                        <Animated.View entering={FadeInDown.delay(200).springify()}>
-                            <TextInput
-                                style={[styles.contentInput, { color: colors.text_secondary }]}
-                                placeholder="Write your note here..."
-                                placeholderTextColor={colors.text_tertiary}
-                                value={content}
-                                onChangeText={setContent}
-                                multiline
-                                textAlignVertical="top"
-                            />
-                        </Animated.View>
-                        <Animated.View entering={FadeInDown.delay(300).springify()}>
-                            <View style={styles.section}>
-                                <Text style={[styles.sectionTitle, { color: colors.text_secondary }]}>Color</Text>
-                                <View style={styles.colorOptions}>
-                                    {NOTE_COLORS.map(color => (
-                                        <TouchableOpacity
-                                            key={color.value}
-                                            style={[
-                                                styles.colorOption,
-                                                { backgroundColor: color.value },
-                                                selectedColor === color.value && styles.selectedColor,
-                                            ]}
-                                            onPress={() => setSelectedColor(color.value)}
-                                        >
-                                            {selectedColor === color.value ? (
-                                                <MaterialCommunityIcons name="check" size={20} color={colors.text_inverse} />
-                                            ) : null}
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </View>
-                        </Animated.View>
-                        <Animated.View entering={FadeInDown.delay(400).springify()}>
-                            <View style={styles.section}>
-                                <Text style={[styles.sectionTitle, { color: colors.text_secondary }]}>Tags</Text>
-                                <View style={styles.tagsContainer}>
-                                    {DEFAULT_TAGS.map(tag => (
-                                        <TouchableOpacity
-                                            key={tag.id}
-                                            style={[
-                                                styles.tagOption,
-                                                { borderColor: tag.color },
-                                                selectedTags.includes(tag.label) && { backgroundColor: tag.color },
-                                            ]}
-                                            onPress={() => toggleTag(tag.id)}
-                                        >
-                                            <Text style={[styles.tagText, {
-                                                color: selectedTags.includes(tag.label) ? colors.text_inverse : tag.color
-                                            }]}>
-                                                #{tag.label}
-                                            </Text>
-                                        </TouchableOpacity>
-                                    ))}
-                                </View>
-                            </View>
-                        </Animated.View>
-                    </>
-                ) : (
-                    <>
-                        <Animated.View entering={FadeInDown.delay(100).springify()}>
-                            <Text style={[styles.title, {
-                                fontSize: responsiveFontSize,
-                                color: colors.text_primary
-                            }]}>{note.title}</Text>
-                        </Animated.View>
-                        <Animated.View entering={FadeInDown.delay(200).springify()}>
-                            <Text style={[styles.timestamp, { color: colors.text_tertiary }]}>{getTimeAgo(note.updatedAt)}</Text>
-                        </Animated.View>
-                        <Animated.View entering={FadeInDown.delay(300).springify()}>
-                            {note.content ? (
-                                <Text style={[styles.contentText, { color: colors.text_secondary }]}>{note.content}</Text>
-                            ) : null}
-                        </Animated.View>
-                        {noteTags.length > 0 ? (
-                            <Animated.View entering={FadeInDown.delay(400).springify()}>
-                                <View style={styles.tagsContainer}>
-                                    {noteTags.map(tag => (
-                                        <Text key={tag} style={[styles.tag, { color: colors.accent_cyan }]}>
-                                            #{tag}
-                                        </Text>
-                                    ))}
-                                </View>
-                            </Animated.View>
-                        ) : null}
-                    </>
-                )}
-            </Animated.ScrollView>
-        </ScreenContainer>
+        <
+        Animated.ScrollView style = {
+            [styles.content, { backgroundColor: colors.bg_dark }] }
+        keyboardShouldPersistTaps = "handled" >
+        {
+            isEditing ? ( <
+                >
+                <
+                Animated.View entering = { FadeInDown.delay(100).springify() } >
+                <
+                TextInput style = {
+                    [styles.titleInput, { color: colors.text_primary }] }
+                placeholder = "Note title..."
+                placeholderTextColor = { colors.text_tertiary }
+                value = { title }
+                onChangeText = { setTitle }
+                /> <
+                /Animated.View> <
+                Animated.View entering = { FadeInDown.delay(200).springify() } >
+                <
+                TextInput style = {
+                    [styles.contentInput, { color: colors.text_secondary }] }
+                placeholder = "Write your note here..."
+                placeholderTextColor = { colors.text_tertiary }
+                value = { content }
+                onChangeText = { setContent }
+                multiline textAlignVertical = "top" /
+                >
+                <
+                /Animated.View> <
+                Animated.View entering = { FadeInDown.delay(300).springify() } >
+                <
+                View style = { styles.section } >
+                <
+                Text style = {
+                    [styles.sectionTitle, { color: colors.text_secondary }] } > Color < /Text> <
+                View style = { styles.colorOptions } > {
+                    NOTE_COLORS.map(color => ( <
+                        TouchableOpacity key = { color.value }
+                        style = {
+                            [
+                                styles.colorOption,
+                                { backgroundColor: color.value },
+                                selectedColor === color.value && styles.selectedColor,
+                            ]
+                        }
+                        onPress = {
+                            () => setSelectedColor(color.value) } >
+                        {
+                            selectedColor === color.value ? ( <
+                                MaterialCommunityIcons name = "check"
+                                size = { 20 }
+                                color = { colors.text_inverse }
+                                />
+                            ) : null
+                        } <
+                        /TouchableOpacity>
+                    ))
+                } <
+                /View> <
+                /View> <
+                /Animated.View> <
+                Animated.View entering = { FadeInDown.delay(400).springify() } >
+                <
+                View style = { styles.section } >
+                <
+                Text style = {
+                    [styles.sectionTitle, { color: colors.text_secondary }] } > Tags < /Text> <
+                View style = { styles.tagsContainer } > {
+                    DEFAULT_TAGS.map(tag => ( <
+                        TouchableOpacity key = { tag.id }
+                        style = {
+                            [
+                                styles.tagOption,
+                                { borderColor: tag.color },
+                                selectedTags.includes(tag.label) && { backgroundColor: tag.color },
+                            ]
+                        }
+                        onPress = {
+                            () => toggleTag(tag.id) } >
+                        <
+                        Text style = {
+                            [styles.tagText, {
+                                color: selectedTags.includes(tag.label) ? colors.text_inverse : tag.color
+                            }]
+                        } > #{ tag.label } <
+                        /Text> <
+                        /TouchableOpacity>
+                    ))
+                } <
+                /View> <
+                /View> <
+                /Animated.View> <
+                />
+            ) : ( <
+                >
+                <
+                Animated.View entering = { FadeInDown.delay(100).springify() } >
+                <
+                Text style = {
+                    [styles.title, {
+                        fontSize: responsiveFontSize,
+                        color: colors.text_primary
+                    }]
+                } > { note.title } < /Text> <
+                /Animated.View> <
+                Animated.View entering = { FadeInDown.delay(200).springify() } >
+                <
+                Text style = {
+                    [styles.timestamp, { color: colors.text_tertiary }] } > { getTimeAgo(note.updatedAt) } < /Text> <
+                /Animated.View> <
+                Animated.View entering = { FadeInDown.delay(300).springify() } > {
+                    note.content ? ( <
+                        Text style = {
+                            [styles.contentText, { color: colors.text_secondary }] } > { note.content } < /Text>
+                    ) : null
+                } <
+                /Animated.View> {
+                    noteTags.length > 0 ? ( <
+                        Animated.View entering = { FadeInDown.delay(400).springify() } >
+                        <
+                        View style = { styles.tagsContainer } > {
+                            noteTags.map(tag => ( <
+                                Text key = { tag }
+                                style = {
+                                    [styles.tag, { color: colors.accent_cyan }] } > #{ tag } <
+                                /Text>
+                            ))
+                        } <
+                        /View> <
+                        /Animated.View>
+                    ) : null
+                } <
+                />
+            )
+        } <
+        /Animated.ScrollView> <
+        /ScreenContainer>
     );
 };
 
+/* ========================================================================== */
+/*  Styles                                                                    */
+/* ========================================================================== */
 const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',

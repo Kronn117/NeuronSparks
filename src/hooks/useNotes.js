@@ -1,15 +1,26 @@
 /**
- * Custom Hooks - useNotes
- * Hook for accessing note context with error handling
+ * ============================================================================
+ * useNotes Hook
+ * ============================================================================
+ *
+ * @file useNotes.js
+ * @description Thin convenience wrapper around `useContext(NoteContext)` with
+ * a built-in guard that throws if the hook is called outside the provider tree.
+ * This is the preferred way for any component to interact with notes state.
+ *
+ * @returns {object} The full NoteContext value (state + dispatchers)
+ * @throws {Error} If used outside NoteContextProvider
+ * @see src/context/NoteContext.js
  */
 
 import { useContext } from 'react';
 import { NoteContext } from '@context/NoteContext';
 
 /**
- * Hook to use NoteContext
- * @throws Error if used outside NoteContextProvider
- * @returns {object} NoteContext value
+ * Access the NoteContext from any descendant component.
+ *
+ * @returns {object} NoteContext value — notes array, CRUD helpers, sort state, etc.
+ * @throws {Error} If called outside of NoteContextProvider
  */
 export const useNotes = () => {
     const context = useContext(NoteContext);

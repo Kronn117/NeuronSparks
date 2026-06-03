@@ -1,6 +1,21 @@
 /**
- * Input Validation Service
- * All validation functions return { isValid, errors }
+ * ============================================================================
+ * Input Validation Functions
+ * ============================================================================
+ *
+ * @file validators.js
+ * @description Pure validation functions that return result objects
+ * `{ isValid: boolean, errors: string[] }`.  Used by ValidationService
+ * and can be called directly in unit tests.
+ *
+ * Validators:
+ *   - validateNote(note)          — full note object
+ *   - validateTitle(title)        — title length / emptiness
+ *   - validateContent(content)    — content length limits
+ *   - validateTags(tags)          — tag count and format
+ *
+ * @see src/utils/constants.js - VALIDATION_RULES
+ * @see ValidationService.js   - Higher-level wrapper
  */
 
 import { VALIDATION_RULES } from './constants';

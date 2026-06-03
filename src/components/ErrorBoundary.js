@@ -1,6 +1,22 @@
 ﻿/**
+ * ============================================================================
  * ErrorBoundary Component
- * Catches errors in component tree
+ * ============================================================================
+ *
+ * @file ErrorBoundary.js
+ * @description A React class-component error boundary that catches unhandled
+ *              exceptions thrown anywhere in the child component tree during
+ *              rendering, lifecycle methods, or constructors.
+ *
+ *              When an error is caught it renders a friendly "Oops!" screen
+ *              with the error message and a "Try Again" button that resets
+ *              the boundary state so the app can recover without a full reload.
+ *
+ * Placed at the very top of the provider tree in App.js.
+ *
+ * @props {React.ReactNode} children - The application component tree
+ *
+ * @see https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary
  */
 
 import React from 'react';
@@ -28,14 +44,17 @@ class ErrorBoundary extends React.Component {
 
     render() {
         if (this.state.hasError) {
-            return (
-                <View style={styles.container}>
-                    <Text style={styles.title}>Oops! Something went wrong</Text>
-                    <Text style={styles.error}>{this.state.error?.message || 'Unknown error'}</Text>
-                    <TouchableOpacity style={styles.button} onPress={this.handleReset}>
-                        <Text style={styles.buttonText}>Try Again</Text>
-                    </TouchableOpacity>
-                </View>
+            return ( <
+                View style = { styles.container } >
+                <
+                Text style = { styles.title } > Oops!Something went wrong < /Text> <
+                Text style = { styles.error } > { this.state.error ? .message || 'Unknown error' } < /Text> <
+                TouchableOpacity style = { styles.button }
+                onPress = { this.handleReset } >
+                <
+                Text style = { styles.buttonText } > Try Again < /Text> <
+                /TouchableOpacity> <
+                /View>
             );
         }
 

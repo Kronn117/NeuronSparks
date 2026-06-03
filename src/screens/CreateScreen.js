@@ -1,5 +1,16 @@
 /**
+ * ============================================================================
  * Create Screen
+ * ============================================================================
+ *
+ * @file CreateScreen.js
+ * @description Note-creation form with fields for title, content, colour, and
+ * tags.  Accepts optional `initialData` via route params (used for
+ * share-to-app flows).  On save the note is dispatched to NoteContext which
+ * persists via StorageService.
+ *
+ * @see NoteContext.addNote
+ * @see src/utils/constants.js - DEFAULT_TAGS, NOTE_COLORS, DEFAULT_NOTE_COLOR
  */
 
 import React, {
@@ -50,12 +61,18 @@ import {
     logger
 } from '@utils/logger';
 
+/** Empty-note template used as the default initial state. */
 const EMPTY_INITIAL = {
     title: '',
     content: '',
     tags: []
 };
 
+/**
+ * CreateScreen component — form for composing and saving a new note.
+ *
+ * @returns {JSX.Element}
+ */
 const CreateScreen = () => {
     const navigation = useNavigation();
     const route = useRoute();
@@ -84,6 +101,7 @@ const CreateScreen = () => {
         startFadeIn();
     }, [startFadeIn]);
 
+    /** Toggle a tag on/off; enforces a maximum of 5 tags per note. */
     const toggleTag = useCallback((tagId) => {
         const tag = DEFAULT_TAGS.find(t => t.id === tagId);
         if (!tag) return;
@@ -100,7 +118,8 @@ const CreateScreen = () => {
         });
     }, []);
 
-    const handleSave = useCallback(async () => {
+    /** Validate, persist the new note via NoteContext, and navigate back. */
+    const handleSave = useCallback(async() => {
         if (!title.trim()) {
             Alert.alert('Error', 'Please enter a title');
             return;
@@ -125,107 +144,148 @@ const CreateScreen = () => {
         }
     }, [title, content, selectedTags, selectedColor, addNote, navigation]);
 
-    return (
-        <ScreenContainer>
-            <Animated.View style={[styles.header, fadeInStyle, {
+    return ( <
+        ScreenContainer >
+        <
+        Animated.View style = {
+            [styles.header, fadeInStyle, {
                 backgroundColor: colors.bg_dark,
                 borderBottomColor: colors.border_medium
-            }]}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <MaterialCommunityIcons name="arrow-left" size={24} color={colors.text_primary} />
-                </TouchableOpacity>
-                <Text style={[styles.headerTitle, {
-                    fontSize: responsiveFontSize,
-                    color: colors.text_primary
-                }]}>New Note</Text>
-                <TouchableOpacity onPress={handleSave} style={styles.saveButton} disabled={loading}>
-                    <MaterialCommunityIcons
-                        name="check"
-                        size={24}
-                        color={loading ? colors.text_tertiary : colors.primary}
-                    />
-                </TouchableOpacity>
-            </Animated.View>
+            }]
+        } >
+        <
+        TouchableOpacity onPress = {
+            () => navigation.goBack() }
+        style = { styles.backButton } >
+        <
+        MaterialCommunityIcons name = "arrow-left"
+        size = { 24 }
+        color = { colors.text_primary }
+        /> <
+        /TouchableOpacity> <
+        Text style = {
+            [styles.headerTitle, {
+                fontSize: responsiveFontSize,
+                color: colors.text_primary
+            }]
+        } > New Note < /Text> <
+        TouchableOpacity onPress = { handleSave }
+        style = { styles.saveButton }
+        disabled = { loading } >
+        <
+        MaterialCommunityIcons name = "check"
+        size = { 24 }
+        color = { loading ? colors.text_tertiary : colors.primary }
+        /> <
+        /TouchableOpacity> <
+        /Animated.View>
 
-            <Animated.ScrollView
-                style={[styles.content, { backgroundColor: colors.bg_dark }]}
-                keyboardShouldPersistTaps="handled"
-            >
-                <Animated.View entering={FadeInDown.delay(100).springify()}>
-                    <TextInput
-                        style={[styles.titleInput, { color: colors.text_primary }]}
-                        placeholder="Note title..."
-                        placeholderTextColor={colors.text_tertiary}
-                        value={title}
-                        onChangeText={setTitle}
-                        autoFocus
-                    />
-                </Animated.View>
+        <
+        Animated.ScrollView style = {
+            [styles.content, { backgroundColor: colors.bg_dark }] }
+        keyboardShouldPersistTaps = "handled" >
+        <
+        Animated.View entering = { FadeInDown.delay(100).springify() } >
+        <
+        TextInput style = {
+            [styles.titleInput, { color: colors.text_primary }] }
+        placeholder = "Note title..."
+        placeholderTextColor = { colors.text_tertiary }
+        value = { title }
+        onChangeText = { setTitle }
+        autoFocus /
+        >
+        <
+        /Animated.View>
 
-                <Animated.View entering={FadeInDown.delay(200).springify()}>
-                    <TextInput
-                        style={[styles.contentInput, { color: colors.text_secondary }]}
-                        placeholder="Write your note here..."
-                        placeholderTextColor={colors.text_tertiary}
-                        value={content}
-                        onChangeText={setContent}
-                        multiline
-                        textAlignVertical="top"
-                    />
-                </Animated.View>
+        <
+        Animated.View entering = { FadeInDown.delay(200).springify() } >
+        <
+        TextInput style = {
+            [styles.contentInput, { color: colors.text_secondary }] }
+        placeholder = "Write your note here..."
+        placeholderTextColor = { colors.text_tertiary }
+        value = { content }
+        onChangeText = { setContent }
+        multiline textAlignVertical = "top" /
+        >
+        <
+        /Animated.View>
 
-                <Animated.View entering={FadeInDown.delay(300).springify()}>
-                    <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, { color: colors.text_secondary }]}>Color</Text>
-                        <View style={styles.colorOptions}>
-                            {NOTE_COLORS.map(color => (
-                                <TouchableOpacity
-                                    key={color.value}
-                                    style={[
-                                        styles.colorOption,
-                                        { backgroundColor: color.value },
-                                        selectedColor === color.value && styles.selectedColor,
-                                    ]}
-                                    onPress={() => setSelectedColor(color.value)}
-                                >
-                                    {selectedColor === color.value ? (
-                                        <MaterialCommunityIcons name="check" size={20} color={colors.text_inverse} />
-                                    ) : null}
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </View>
-                </Animated.View>
+        <
+        Animated.View entering = { FadeInDown.delay(300).springify() } >
+        <
+        View style = { styles.section } >
+        <
+        Text style = {
+            [styles.sectionTitle, { color: colors.text_secondary }] } > Color < /Text> <
+        View style = { styles.colorOptions } > {
+            NOTE_COLORS.map(color => ( <
+                TouchableOpacity key = { color.value }
+                style = {
+                    [
+                        styles.colorOption,
+                        { backgroundColor: color.value },
+                        selectedColor === color.value && styles.selectedColor,
+                    ]
+                }
+                onPress = {
+                    () => setSelectedColor(color.value) } >
+                {
+                    selectedColor === color.value ? ( <
+                        MaterialCommunityIcons name = "check"
+                        size = { 20 }
+                        color = { colors.text_inverse }
+                        />
+                    ) : null
+                } <
+                /TouchableOpacity>
+            ))
+        } <
+        /View> <
+        /View> <
+        /Animated.View>
 
-                <Animated.View entering={FadeInDown.delay(400).springify()}>
-                    <View style={styles.section}>
-                        <Text style={[styles.sectionTitle, { color: colors.text_secondary }]}>Tags</Text>
-                        <View style={styles.tagsContainer}>
-                            {DEFAULT_TAGS.map(tag => (
-                                <TouchableOpacity
-                                    key={tag.id}
-                                    style={[
-                                        styles.tagOption,
-                                        { borderColor: tag.color },
-                                        selectedTags.includes(tag.label) && { backgroundColor: tag.color },
-                                    ]}
-                                    onPress={() => toggleTag(tag.id)}
-                                >
-                                    <Text style={[styles.tagText, {
-                                        color: selectedTags.includes(tag.label) ? colors.text_inverse : tag.color
-                                    }]}>
-                                        #{tag.label}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
-                    </View>
-                </Animated.View>
-            </Animated.ScrollView>
-        </ScreenContainer>
+        <
+        Animated.View entering = { FadeInDown.delay(400).springify() } >
+        <
+        View style = { styles.section } >
+        <
+        Text style = {
+            [styles.sectionTitle, { color: colors.text_secondary }] } > Tags < /Text> <
+        View style = { styles.tagsContainer } > {
+            DEFAULT_TAGS.map(tag => ( <
+                TouchableOpacity key = { tag.id }
+                style = {
+                    [
+                        styles.tagOption,
+                        { borderColor: tag.color },
+                        selectedTags.includes(tag.label) && { backgroundColor: tag.color },
+                    ]
+                }
+                onPress = {
+                    () => toggleTag(tag.id) } >
+                <
+                Text style = {
+                    [styles.tagText, {
+                        color: selectedTags.includes(tag.label) ? colors.text_inverse : tag.color
+                    }]
+                } > #{ tag.label } <
+                /Text> <
+                /TouchableOpacity>
+            ))
+        } <
+        /View> <
+        /View> <
+        /Animated.View> <
+        /Animated.ScrollView> <
+        /ScreenContainer>
     );
 };
 
+/* ========================================================================== */
+/*  Styles                                                                    */
+/* ========================================================================== */
 const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',

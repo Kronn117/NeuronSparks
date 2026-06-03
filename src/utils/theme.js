@@ -1,8 +1,23 @@
 /**
+ * ============================================================================
  * Central Theme Configuration
- * All colors, spacing, typography, and component styles defined here
- * Supports both dark and light modes
- * RULE: THEME is IMMUTABLE - never modify directly
+ * ============================================================================
+ *
+ * @file theme.js
+ * @description Single source of truth for every colour, spacing scale,
+ * typography token, shadow, border-radius, and animation constant used
+ * across the app.  Supports both dark and light palettes; the current
+ * build is locked to dark mode (Tony Stark / cyberpunk aesthetic).
+ *
+ * Key exports:
+ *   - DARK_COLORS / LIGHT_COLORS — full colour palettes
+ *   - SPACING, FONT_SIZES, FONT_WEIGHTS, BORDER_RADIUS
+ *   - THEME — merged object with `colors`, `spacing`, etc.
+ *   - getThemeColors(isDark), getThemeShadows(isDark)
+ *
+ * RULE: THEME is IMMUTABLE — never modify it directly.
+ *
+ * @see ThemeContext.js - Consumes these tokens
  */
 
 // Dark Mode Color Palette - Enhanced Tony Stark Theme
@@ -11,7 +26,7 @@ const DARK_COLORS = {
     primary: '#00D4FF', // Brighter, more vibrant arc reactor blue
     primaryDark: '#0099CC',
     primaryLight: '#66E5FF',
-    
+
     // Gold Accents - Premium Iron Gold
     gold: '#FFC800', // Warmer, more premium gold
     goldDark: '#D4A500',
@@ -74,7 +89,7 @@ const LIGHT_COLORS = {
     primary: '#0EA5E9', // Sky blue
     primaryDark: '#0284C7',
     primaryLight: '#38BDF8',
-    
+
     // Gold Accents - Warm Gold
     gold: '#F59E0B', // Amber
     goldDark: '#D97706',

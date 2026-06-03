@@ -1,6 +1,21 @@
 /**
+ * ============================================================================
  * Custom Error Classes
- * Application-specific error types
+ * ============================================================================
+ *
+ * @file errors.js
+ * @description Application-specific error hierarchy.  Each error class
+ * extends `Error` with a `code` string and optional `details` payload,
+ * making it easy for services to throw typed errors and for catch-blocks
+ * to differentiate failure modes.
+ *
+ * Class tree:
+ *   AppError (base)
+ *    ├─ StorageError
+ *    ├─ ValidationError
+ *    ├─ NetworkError
+ *    ├─ NavigationError
+ *    └─ AuthenticationError
  */
 
 /**

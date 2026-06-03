@@ -1,5 +1,22 @@
 /**
+ * ============================================================================
  * Settings Screen
+ * ============================================================================
+ *
+ * @file SettingsScreen.js
+ * @description App-settings and data-management hub.  Provides:
+ *   - Clear All Notes (with destructive confirmation)
+ *   - Export Notes (JSON / CSV / Markdown via the system share sheet)
+ *   - Restore Last Deleted Note
+ *   - About dialog (version info)
+ *
+ * Export flow:
+ *   1. Calls the appropriate ExportService method.
+ *   2. Writes the result to `FileSystem.cacheDirectory`.
+ *   3. Invokes `expo-sharing` (falls back to `Share.share` on web).
+ *
+ * @see ExportService, NoteContext.restoreLastDeleted
+ * @see src/utils/constants.js - APP_VERSION, SUCCESS_MESSAGES
  */
 
 import React, {
@@ -51,6 +68,11 @@ import {
     logger
 } from '@utils/logger';
 
+/**
+ * SettingsScreen component — data management and app info.
+ *
+ * @returns {JSX.Element}
+ */
 const SettingsScreen = () => {
     const navigation = useNavigation();
     const {
@@ -72,18 +94,18 @@ const SettingsScreen = () => {
         startFadeIn();
     }, [startFadeIn]);
 
+    /** Show destructive confirmation, then delete every note. */
     const handleClearAllNotesPress = () => {
         Alert.alert(
             'Clear All Notes',
-            'Are you sure you want to delete all notes? This action cannot be undone.',
-            [{
+            'Are you sure you want to delete all notes? This action cannot be undone.', [{
                     text: 'Cancel',
                     style: 'cancel'
                 },
                 {
                     text: 'Delete All',
                     style: 'destructive',
-                    onPress: async () => {
+                    onPress: async() => {
                         try {
                             const allNoteIds = notes.map(n => n.id);
                             if (allNoteIds.length > 0) {
@@ -102,6 +124,10 @@ const SettingsScreen = () => {
         );
     };
 
+    /**
+     * Write exported file to cache and invoke the system share sheet.
+     * Falls back to plain text sharing when `expo-sharing` is unavailable (web).
+     */
     const shareExportFile = async(format, contents, mimeType) => {
         const filename = ExportService.getExportFilename(format);
         const fileUri = `${FileSystem.cacheDirectory}${filename}`;
@@ -124,6 +150,7 @@ const SettingsScreen = () => {
         }
     };
 
+    /** Dispatch export to the correct format handler and show result alert. */
     const exportNotesAs = async(format) => {
         if (notes.length === 0) {
             Alert.alert('Info', 'No notes to export');
@@ -149,6 +176,7 @@ const SettingsScreen = () => {
         }
     };
 
+    /** Show format-picker dialog and trigger export. */
     const handleExportNotesPress = () => {
         Alert.alert('Export Notes', 'Choose a file format.', [
             { text: 'JSON', onPress: () => exportNotesAs('json') },
@@ -158,6 +186,7 @@ const SettingsScreen = () => {
         ]);
     };
 
+    /** Attempt to restore the most recently deleted note. */
     const handleRestoreDeletedPress = async() => {
         try {
             const restored = await restoreLastDeleted();
@@ -172,16 +201,17 @@ const SettingsScreen = () => {
         }
     };
 
+    /** Display version and project info in an alert dialog. */
     const handleAboutPress = () => {
         Alert.alert(
             'About Neuro Sparks',
-            `Version ${APP_VERSION}\n\nA production-grade sci-fi themed notes application built with React Native and Expo.`,
-            [{
+            `Version ${APP_VERSION}\n\nA production-grade sci-fi themed notes application built with React Native and Expo.`, [{
                 text: 'OK'
             }],
         );
     };
 
+    /** Configuration array driving the settings list UI. */
     const settingsItems = [{
             icon: 'delete-sweep',
             title: 'Clear All Notes',
@@ -212,79 +242,131 @@ const SettingsScreen = () => {
         },
     ];
 
-    return (
-        <ScreenContainer>
-            <Animated.View style={[styles.header, fadeInStyle, {
+    return ( <
+        ScreenContainer >
+        <
+        Animated.View style = {
+            [styles.header, fadeInStyle, {
                 backgroundColor: colors.bg_dark,
                 borderBottomColor: colors.border_medium
-            }]}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <MaterialCommunityIcons name="arrow-left" size={24} color={colors.text_primary} />
-                </TouchableOpacity>
-                <Text style={[styles.headerTitle, {
-                    fontSize: responsiveFontSize,
-                    color: colors.text_primary
-                }]}>Settings</Text>
-            </Animated.View>
+            }]
+        } >
+        <
+        TouchableOpacity onPress = {
+            () => navigation.goBack() }
+        style = { styles.backButton } >
+        <
+        MaterialCommunityIcons name = "arrow-left"
+        size = { 24 }
+        color = { colors.text_primary }
+        /> <
+        /TouchableOpacity> <
+        Text style = {
+            [styles.headerTitle, {
+                fontSize: responsiveFontSize,
+                color: colors.text_primary
+            }]
+        } > Settings < /Text> <
+        /Animated.View>
 
-            <Animated.ScrollView style={[styles.content, { backgroundColor: colors.bg_dark }]}>
-                <Animated.View entering={FadeInDown.delay(100).springify()}>
-                    <View style={[styles.section, { backgroundColor: colors.bg_card }]}>
-                        <Text style={[styles.sectionTitle, { color: colors.text_secondary }]}>Data Management</Text>
-                        {settingsItems.slice(0, 3).map((item, index) => (
-                            <TouchableOpacity key={index} style={styles.settingItem} onPress={item.handlePress}>
-                                <View style={styles.settingItemLeft}>
-                                    <MaterialCommunityIcons
-                                        name={item.icon}
-                                        size={24}
-                                        color={item.color}
-                                        style={styles.settingIcon}
-                                    />
-                                    <View style={styles.settingItemText}>
-                                        <Text style={[styles.settingTitle, { color: colors.text_primary }]}>{item.title}</Text>
-                                        <Text style={[styles.settingDescription, { color: colors.text_tertiary }]}>{item.description}</Text>
-                                    </View>
-                                </View>
-                                <MaterialCommunityIcons name="chevron-right" size={24} color={colors.text_tertiary} />
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </Animated.View>
+        <
+        Animated.ScrollView style = {
+            [styles.content, { backgroundColor: colors.bg_dark }] } >
+        <
+        Animated.View entering = { FadeInDown.delay(100).springify() } >
+        <
+        View style = {
+            [styles.section, { backgroundColor: colors.bg_card }] } >
+        <
+        Text style = {
+            [styles.sectionTitle, { color: colors.text_secondary }] } > Data Management < /Text> {
+            settingsItems.slice(0, 3).map((item, index) => ( <
+                TouchableOpacity key = { index }
+                style = { styles.settingItem }
+                onPress = { item.handlePress } >
+                <
+                View style = { styles.settingItemLeft } >
+                <
+                MaterialCommunityIcons name = { item.icon }
+                size = { 24 }
+                color = { item.color }
+                style = { styles.settingIcon }
+                /> <
+                View style = { styles.settingItemText } >
+                <
+                Text style = {
+                    [styles.settingTitle, { color: colors.text_primary }] } > { item.title } < /Text> <
+                Text style = {
+                    [styles.settingDescription, { color: colors.text_tertiary }] } > { item.description } < /Text> <
+                /View> <
+                /View> <
+                MaterialCommunityIcons name = "chevron-right"
+                size = { 24 }
+                color = { colors.text_tertiary }
+                /> <
+                /TouchableOpacity>
+            ))
+        } <
+        /View> <
+        /Animated.View>
 
-                <Animated.View entering={FadeInDown.delay(200).springify()}>
-                    <View style={[styles.section, { backgroundColor: colors.bg_card }]}>
-                        <Text style={[styles.sectionTitle, { color: colors.text_secondary }]}>About</Text>
-                        {settingsItems.slice(3).map((item, index) => (
-                            <TouchableOpacity key={index} style={styles.settingItem} onPress={item.handlePress}>
-                                <View style={styles.settingItemLeft}>
-                                    <MaterialCommunityIcons
-                                        name={item.icon}
-                                        size={24}
-                                        color={item.color}
-                                        style={styles.settingIcon}
-                                    />
-                                    <View style={styles.settingItemText}>
-                                        <Text style={[styles.settingTitle, { color: colors.text_primary }]}>{item.title}</Text>
-                                        <Text style={[styles.settingDescription, { color: colors.text_tertiary }]}>{item.description}</Text>
-                                    </View>
-                                </View>
-                                <MaterialCommunityIcons name="chevron-right" size={24} color={colors.text_tertiary} />
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                </Animated.View>
+        <
+        Animated.View entering = { FadeInDown.delay(200).springify() } >
+        <
+        View style = {
+            [styles.section, { backgroundColor: colors.bg_card }] } >
+        <
+        Text style = {
+            [styles.sectionTitle, { color: colors.text_secondary }] } > About < /Text> {
+            settingsItems.slice(3).map((item, index) => ( <
+                TouchableOpacity key = { index }
+                style = { styles.settingItem }
+                onPress = { item.handlePress } >
+                <
+                View style = { styles.settingItemLeft } >
+                <
+                MaterialCommunityIcons name = { item.icon }
+                size = { 24 }
+                color = { item.color }
+                style = { styles.settingIcon }
+                /> <
+                View style = { styles.settingItemText } >
+                <
+                Text style = {
+                    [styles.settingTitle, { color: colors.text_primary }] } > { item.title } < /Text> <
+                Text style = {
+                    [styles.settingDescription, { color: colors.text_tertiary }] } > { item.description } < /Text> <
+                /View> <
+                /View> <
+                MaterialCommunityIcons name = "chevron-right"
+                size = { 24 }
+                color = { colors.text_tertiary }
+                /> <
+                /TouchableOpacity>
+            ))
+        } <
+        /View> <
+        /Animated.View>
 
-                <Animated.View entering={FadeInDown.delay(300).springify()}>
-                    <View style={styles.infoSection}>
-                        <Text style={[styles.infoText, { color: colors.text_tertiary }]}>Neuro Sparks v{APP_VERSION}</Text>
-                        <Text style={[styles.infoText, { color: colors.text_tertiary }]}>Built with React Native and Expo</Text>
-                    </View>
-                </Animated.View>
-            </Animated.ScrollView>
-        </ScreenContainer>
+        <
+        Animated.View entering = { FadeInDown.delay(300).springify() } >
+        <
+        View style = { styles.infoSection } >
+        <
+        Text style = {
+            [styles.infoText, { color: colors.text_tertiary }] } > Neuro Sparks v { APP_VERSION } < /Text> <
+        Text style = {
+            [styles.infoText, { color: colors.text_tertiary }] } > Built with React Native and Expo < /Text> <
+        /View> <
+        /Animated.View> <
+        /Animated.ScrollView> <
+        /ScreenContainer>
     );
 };
 
+/* ========================================================================== */
+/*  Styles                                                                    */
+/* ========================================================================== */
 const styles = StyleSheet.create({
     header: {
         flexDirection: 'row',

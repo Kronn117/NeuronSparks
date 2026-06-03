@@ -1,6 +1,30 @@
 /**
+ * ============================================================================
  * Settings Context
- * Manages user preferences and app settings
+ * ============================================================================
+ *
+ * @file SettingsContext.js
+ * @description Manages all user-configurable preferences: sort order, font size,
+ * dark-mode flag, auto-backup toggle, backup frequency, and notification
+ * settings.  Values are loaded from AsyncStorage on mount and persisted on
+ * every update so preferences survive app restarts.
+ *
+ * State shape:
+ *   {
+ *     settings: {
+ *       defaultSortBy: string,
+ *       fontSize: 'sm'|'md'|'lg',
+ *       isDarkMode: boolean,
+ *       autoBackup: boolean,
+ *       backupFrequency: 'daily'|'weekly'|'monthly',
+ *       notificationsEnabled: boolean
+ *     },
+ *     loading: boolean
+ *   }
+ *
+ * @see src/services/StorageService.js - getSettings / saveSettings
+ * @see src/utils/constants.js         - DEFAULT_SORT
+ * @see src/screens/SettingsScreen.js  - UI that consumes this context
  */
 
 import React, { createContext, useReducer, useCallback, useEffect } from 'react';
@@ -8,11 +32,12 @@ import { logger } from '@utils/logger';
 import { StorageService } from '@services/StorageService';
 import { DEFAULT_SORT } from '@utils/constants';
 
-// Create context
+/** The raw React context — prefer a dedicated hook for access. */
 export const SettingsContext = createContext();
 
 /**
- * Default settings
+ * Default settings used when no persisted data exists.
+ * These values also power the "Reset to Defaults" feature.
  */
 const defaultSettings = {
     defaultSortBy: DEFAULT_SORT,
@@ -24,16 +49,15 @@ const defaultSettings = {
 };
 
 /**
- * Initial state
+ * Initial reducer state — `loading: true` prevents the UI from rendering
+ * before persisted settings have been hydrated from AsyncStorage.
  */
 const initialState = {
     settings: defaultSettings,
     loading: true,
 };
 
-/**
- * Action types
- */
+/** Action type constants consumed by the settings reducer. */
 const ACTIONS = {
     SET_SETTINGS: 'SET_SETTINGS',
     UPDATE_SETTING: 'UPDATE_SETTING',
@@ -42,7 +66,11 @@ const ACTIONS = {
 };
 
 /**
- * Reducer function
+ * Settings reducer — immutable state transitions for user preferences.
+ *
+ * @param {object} state  - Current settings state
+ * @param {object} action - Dispatch action with `type` and `payload`
+ * @returns {object} Next state
  */
 const settingsReducer = (state, action) => {
     switch (action.type) {
@@ -67,11 +95,20 @@ const settingsReducer = (state, action) => {
 };
 
 /**
- * SettingsContextProvider Component
+ * SettingsContextProvider
+ *
+ * Wraps the component tree and exposes user preferences plus memoised
+ * updater functions to all descendants.
+ *
+ * @param {{ children: React.ReactNode }} props
+ * @returns {JSX.Element} Context provider wrapping children
  */
 export const SettingsContextProvider = ({ children }) => {
     const [state, dispatch] = useReducer(settingsReducer, initialState);
 
+    /* ------------------------------------------------------------------ */
+    /*  Hydrate persisted settings from AsyncStorage on mount              */
+    /* ------------------------------------------------------------------ */
     /**
      * Load settings from storage
      */
@@ -95,7 +132,10 @@ export const SettingsContextProvider = ({ children }) => {
     }, []);
 
     /**
-     * Update a single setting
+     * Update a single setting by key and persist the change.
+     *
+     * @param {string} key   - Setting name (e.g. 'fontSize')
+     * @param {*}      value - New value for the setting
      */
     const updateSetting = useCallback(
         async(key, value) => {
@@ -116,7 +156,9 @@ export const SettingsContextProvider = ({ children }) => {
     );
 
     /**
-     * Update multiple settings
+     * Batch-update multiple settings at once and persist.
+     *
+     * @param {object} updates - Partial settings object to merge
      */
     const updateSettings = useCallback(
         async updates => {
@@ -137,7 +179,7 @@ export const SettingsContextProvider = ({ children }) => {
     );
 
     /**
-     * Reset to default settings
+     * Reset every setting back to its factory default and persist.
      */
     const resetSettings = useCallback(async() => {
         try {
@@ -153,7 +195,10 @@ export const SettingsContextProvider = ({ children }) => {
     }, []);
 
     /**
-     * Get a specific setting
+     * Read a single setting value by key.
+     *
+     * @param {string} key - Setting name
+     * @returns {*} Current value of the setting
      */
     const getSetting = useCallback(
         key => {
@@ -161,7 +206,7 @@ export const SettingsContextProvider = ({ children }) => {
         }, [state.settings]
     );
 
-    // Context value
+    /** Public context value — settings object + memoised helpers. */
     const value = {
         settings: state.settings,
         loading: state.loading,
@@ -171,5 +216,5 @@ export const SettingsContextProvider = ({ children }) => {
         getSetting,
     };
 
-    return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
+    return <SettingsContext.Provider value = { value } > { children } < /SettingsContext.Provider>;
 };

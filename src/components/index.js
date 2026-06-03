@@ -1,6 +1,14 @@
 /**
- * Components Index
- * Central export point for all reusable components
+ * ============================================================================
+ * Components Barrel Export
+ * ============================================================================
+ *
+ * @file index.js
+ * @description Central re-export point for all reusable UI components.
+ *              Importing from '@components' resolves to this file via the
+ *              babel module-resolver alias defined in babel.config.js.
+ *
+ * @module components
  */
 
 export {

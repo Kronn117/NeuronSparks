@@ -1,6 +1,15 @@
 /**
+ * ============================================================================
  * Logging Utility
- * Centralized logging with development/production awareness
+ * ============================================================================
+ *
+ * @file logger.js
+ * @description Centralised structured logger with log-level support
+ * (DEBUG, INFO, LOG, WARN, ERROR).  In development (`__DEV__`) messages
+ * are forwarded to the console; in production they are silently swallowed
+ * to avoid leaking internal details.
+ *
+ * @see Every service and context file imports `logger` for tracing.
  */
 /* eslint-disable no-console */
 

@@ -1,6 +1,15 @@
 /**
- * Custom Hooks - Index
- * Export all custom hooks
+ * ============================================================================
+ * Hooks Barrel Export
+ * ============================================================================
+ *
+ * @file index.js
+ * @description Central re-export for every custom hook in the application.
+ * Importing from `@hooks` (or `src/hooks`) gives access to all hooks with
+ * a single import path.
+ *
+ * @see useNotes, useSearch, useDebounce, useAsync, usePrevious,
+ *      useAnimation, useLocalStorage
  */
 
 export { useNotes }
